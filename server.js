@@ -264,11 +264,17 @@ For navigation to a facility, use:
 For phone call, use:
 [PHONE]03-6461600[/PHONE]
 
+For showing distance from user's city to a facility, use:
+[DIST]שם העיר של המשתמש|שם המתחם[/DIST]
+Where facility name must be one of: תל אביב, חיפה, ירושלים, באר שבע, אשדוד
+
 EXAMPLES of correct usage:
 - Instead of "לפרטים: https://loans.inz.org.il" → write: [BTN]מידע על הלוואות|https://loans.inz.org.il[/BTN]
 - Instead of "לניווט Google Maps" → write: [NAV]בית הלוחם חיפה|https://maps.google.com/?q=דרך+צרפת+101+חיפה|https://waze.com/ul?q=בית+הלוחם+חיפה&navigate=yes[/NAV]
 - Instead of "התקשר ל-03-6461600" → write: [PHONE]03-6461600[/PHONE]
+- When user mentions their city (e.g. "אני גר בנתניה") → write: [DIST]נתניה|תל אביב[/DIST]
 
+When a user mentions their city or location, ALWAYS include a [DIST] tag so they see exact distance and travel time.
 You can put multiple buttons after your text, one per line.
 NEVER write a raw https:// URL anywhere in your response.`;
 
@@ -365,12 +371,78 @@ app.post("/api/chat", validateChatInput, async (req, res) => {
 });
 
 // ============================================================
+// DISTANCE API — Google Routes API
+// ============================================================
+const MAPS_API_KEY = process.env.MAPS_API_KEY;
+
+// Facility address map
+const FACILITY_ADDRESSES = {
+    "תל אביב":  "שמואל ברקאי 49, אפקה, תל אביב, ישראל",
+    "חיפה":     "דרך צרפת 101, חיפה, ישראל",
+    "ירושלים":  "דרך אהרון שולוב 2, ירושלים, ישראל",
+    "באר שבע":  "שדרות בנ\"צ כרמל 9, באר שבע, ישראל",
+    "אשדוד":    "בית הלוחם אשדוד, ישראל"
+};
+
+app.post("/api/distance", async (req, res) => {
+    const { origin, facility } = req.body;
+    if (!origin || !facility) return res.status(400).json({ error: "Missing origin or facility" });
+    if (!MAPS_API_KEY)        return res.status(503).json({ error: "Maps API not configured" });
+
+    const destination = FACILITY_ADDRESSES[facility];
+    if (!destination) return res.status(400).json({ error: "Unknown facility" });
+
+    try {
+        // Call both driving and walking in parallel
+        const fetchMode = async (mode) => {
+            const resp = await fetch("https://routes.googleapis.com/directions/v2:computeRoutes", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Goog-Api-Key": MAPS_API_KEY,
+                    "X-Goog-FieldMask": "routes.duration,routes.distanceMeters"
+                },
+                body: JSON.stringify({
+                    origin:      { address: `${origin}, ישראל` },
+                    destination: { address: destination },
+                    travelMode:  mode,
+                    languageCode: "he"
+                })
+            });
+            const data = await resp.json();
+            if (!data.routes || !data.routes[0]) return null;
+            const route = data.routes[0];
+            const meters  = route.distanceMeters;
+            const seconds = parseInt(route.duration?.replace("s","") || "0");
+            const km      = (meters / 1000).toFixed(1);
+            const mins    = Math.round(seconds / 60);
+            const timeStr = mins >= 60
+                ? `${Math.floor(mins/60)} שעות ${mins%60 > 0 ? `ו-${mins%60} דקות` : ''}`
+                : `${mins} דקות`;
+            return { km, mins, timeStr };
+        };
+
+        const [driving, walking] = await Promise.all([
+            fetchMode("DRIVE"),
+            fetchMode("WALK")
+        ]);
+
+        res.json({ driving, walking, facility, origin });
+
+    } catch (err) {
+        console.error("[DISTANCE]", err.message);
+        res.status(500).json({ error: "Distance calculation failed" });
+    }
+});
+
+// ============================================================
 // HEALTH CHECK
 // ============================================================
 app.get("/health", (req, res) => {
     res.status(200).json({
         status: "ok",
         gemini: GEMINI_API_KEY ? "configured" : "MISSING",
+        maps:   MAPS_API_KEY   ? "configured" : "MISSING",
         timestamp: new Date().toISOString()
     });
 });
