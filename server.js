@@ -148,8 +148,8 @@ CORE MISSION:
 You don't just answer questions — you proactively help members find the best services for them personally.
 Always think: "What does this person actually need right now?" and offer next steps, relevant programs, and navigation help.
 
-LANGUAGE:
-Always respond in the SAME LANGUAGE the user writes in (Hebrew, English, Russian, Arabic, Spanish, Amharic).
+LANGUAGE — CRITICAL RULE:
+Always respond in the EXACT SAME LANGUAGE the user writes in. If the conversation starts with a system message saying "respond only in English", you MUST respond in English for ALL messages. NEVER switch to Hebrew unless the user writes in Hebrew. This rule overrides everything else. Supported: Hebrew, English, French, Russian, Arabic, Spanish, Amharic.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 LOCATION DETECTION & NEAREST FACILITY
@@ -266,7 +266,9 @@ For phone call, use:
 
 For showing distance from user's city to a facility, use:
 [DIST]שם העיר של המשתמש|שם המתחם[/DIST]
-Where facility name must be one of: תל אביב, חיפה, ירושלים, באר שבע, אשדוד
+Where facility name must be EXACTLY one of these values (use the matching language):
+- Hebrew: תל אביב, חיפה, ירושלים, באר שבע, אשדוד
+- English/other: Tel Aviv, Haifa, Jerusalem, Beer Sheva, Ashdod
 
 EXAMPLES of correct usage:
 - Instead of "לפרטים: https://loans.inz.org.il" → write: [BTN]מידע על הלוואות|https://loans.inz.org.il[/BTN]
@@ -375,13 +377,19 @@ app.post("/api/chat", validateChatInput, async (req, res) => {
 // ============================================================
 const MAPS_API_KEY = process.env.MAPS_API_KEY;
 
-// Facility address map
+// Facility address map — accepts Hebrew or English keys
 const FACILITY_ADDRESSES = {
     "תל אביב":  "שמואל ברקאי 49, אפקה, תל אביב, ישראל",
+    "tel aviv": "שמואל ברקאי 49, אפקה, תל אביב, ישראל",
     "חיפה":     "דרך צרפת 101, חיפה, ישראל",
+    "haifa":    "דרך צרפת 101, חיפה, ישראל",
     "ירושלים":  "דרך אהרון שולוב 2, ירושלים, ישראל",
+    "jerusalem":"דרך אהרון שולוב 2, ירושלים, ישראל",
     "באר שבע":  "שדרות בנ\"צ כרמל 9, באר שבע, ישראל",
-    "אשדוד":    "בית הלוחם אשדוד, ישראל"
+    "beer sheva":"שדרות בנ\"צ כרמל 9, באר שבע, ישראל",
+    "beersheba":"שדרות בנ\"צ כרמל 9, באר שבע, ישראל",
+    "אשדוד":    "בית הלוחם אשדוד, ישראל",
+    "ashdod":   "בית הלוחם אשדוד, ישראל"
 };
 
 app.post("/api/distance", async (req, res) => {
@@ -389,7 +397,7 @@ app.post("/api/distance", async (req, res) => {
     if (!origin || !facility) return res.status(400).json({ error: "Missing origin or facility" });
     if (!MAPS_API_KEY)        return res.status(503).json({ error: "Maps API not configured" });
 
-    const destination = FACILITY_ADDRESSES[facility];
+    const destination = FACILITY_ADDRESSES[facility] || FACILITY_ADDRESSES[facility.toLowerCase()];
     if (!destination) return res.status(400).json({ error: "Unknown facility" });
 
     try {
@@ -422,12 +430,11 @@ app.post("/api/distance", async (req, res) => {
             return { km, mins, timeStr };
         };
 
-        const [driving, walking] = await Promise.all([
-            fetchMode("DRIVE"),
-            fetchMode("WALK")
+        const [driving] = await Promise.all([
+            fetchMode("DRIVE")
         ]);
 
-        res.json({ driving, walking, facility, origin });
+        res.json({ driving, facility, origin });
 
     } catch (err) {
         console.error("[DISTANCE]", err.message);
