@@ -917,23 +917,14 @@
             ar: 'منظمة معاقي الجيش الإسرائيلي',
             am: 'IDF አካል ጉዳተኞች ድርጅት',
         };
-        const thankYou = {
-            he: 'תודה על שירותך — אנחנו כאן בשבילך.',
-            en: 'Thank you for your service — we\'re here for you.',
-            fr: 'Merci pour votre service — nous sommes là pour vous.',
-            es: 'Gracias por su servicio — estamos aquí para usted.',
-            ru: 'Спасибо за вашу службу — мы здесь для вас.',
-            ar: 'شكراً لخدمتك — نحن هنا من أجلك.',
-            am: 'አገልግሎትዎ ያስመሰግናል — እዚህ ለእርስዎ ነን።',
-        };
-        const assistantLine = {
-            he: `אני העוזר החכם של ${orgNames['he']}.`,
-            en: `I'm the smart assistant of the ${orgNames['en']}.`,
-            fr: `Je suis l’assistant intelligent de ${orgNames['fr']}.`,
-            es: `Soy el asistente de ${orgNames['es']}.`,
-            ru: `Я помощник ${orgNames['ru']}.`,
-            ar: `أنا المساعد الذكي لـ${orgNames['ar']}.`,
-            am: `የ${orgNames['am']} ብልህ ረዳት ነኝ።`,
+        const introLine = {
+            he: `היי, אני ${AGENT_NAME} מארגון נכי צה"ל — אני פה בשבילך.\nאיך אוכל לעזור?`,
+            en: `Hi, I'm ${AGENT_NAME} from the IDF Disabled Veterans Organization — I'm here for you.\nHow can I help?`,
+            fr: `Bonjour, je m'appelle ${AGENT_NAME} de l'Organisation des Vétérans de Tsahal — je suis là pour vous.\nComment puis-je vous aider?`,
+            es: `Hola, soy ${AGENT_NAME} de la Organización de Veteranos de las FDI — estoy aquí para ti.\n¿En qué puedo ayudarte?`,
+            ru: `Привет, я ${AGENT_NAME} из организации инвалидов ЦАХАЛа — я здесь для вас.\nЧем могу помочь?`,
+            ar: `مرحباً، أنا ${AGENT_NAME} من منظمة معاقي الجيش الإسرائيلي — أنا هنا من أجلك.\nكيف يمكنني مساعدتك؟`,
+            am: `ሰላም፣ እኔ ${AGENT_NAME} ነኝ ከIDF አካል ጉዳተኞች ድርጅት — ለእርስዎ እዚህ ነኝ።\nእንዴት ልረዳዎ?`,
         };
 
         const c = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -952,7 +943,6 @@
 
         lines.push(`${greet} 👋`);
         lines.push(introLine[lang] || introLine['en']);
-        lines.push(closing);
 
         return lines.join('\n');
     }
