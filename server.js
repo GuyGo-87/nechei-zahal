@@ -8,21 +8,14 @@ const fetch = require("node-fetch");
 
 const app = express();
 
-// ============================================================
-// LAYER 0: INFRASTRUCTURE & SECURITY
-// ============================================================
 app.set("trust proxy", 1);
-app.use(helmet({
-    contentSecurityPolicy: false, 
-    crossOriginEmbedderPolicy: false,
-}));
+app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
 
-// CORS - Restricted to your domains
 const ALLOWED_ORIGINS = [
     "https://inz.org.il",
     "https://www.inz.org.il",
     "http://localhost:3000",
-    "https://nechei-zahal.onrender.com" // הוספתי את כתובת ה-Render שלך
+    "https://nechei-zahal.onrender.com"
 ];
 
 app.use(cors({
@@ -37,64 +30,23 @@ app.use(cors({
 app.use(express.json({ limit: "10kb" }));
 app.use(xss());
 
-// ============================================================
-// LAYER 1: RATE LIMITING
-// ============================================================
 const chatLimiter = rateLimit({
     windowMs: 60 * 1000,
     max: 15, 
-    message: { reply: "אתה זז מהר מדי! אנא המתן רגע לפני השאלה הבאה." }
+    message: { reply: "אתה זז מהר מדי! אנא המתן רגע." }
 });
 app.use("/api/chat", chatLimiter);
 
-// ============================================================
-// LAYER 2: GEO-DATA & KNOWLEDGE BASE
-// ============================================================
-const ZDVO_CENTERS = [
-    { id: "tlv", name: "בית הלוחם תל אביב", lat: 32.1154, lng: 34.8194, url: "https://www.blt.inz.org.il/" },
-    { id: "haifa", name: "בית הלוחם חיפה", lat: 32.8256, lng: 34.9660, url: "https://www.blh.inz.org.il/" },
-    { id: "jerusalem", name: "בית הלוחם ירושלים", lat: 31.7516, lng: 35.1872, url: "https://www.blj.inz.org.il/" },
-    { id: "beersheba", name: "בית הלוחם באר שבע", lat: 31.2588, lng: 34.7395, url: "https://www.blb.inz.org.il/" },
-    { id: "nahariya", name: "בית קיי נהריה", lat: 33.0062, lng: 35.0919, url: "https://www.inz.org.il/page.php?id=788" }
-];
+const SYSTEM_PROMPT = `Role: ZDVO Digital Concierge. Support Hebrew. Professional and concise. 
+If user mentions city, guide to nearest Beit HaLohem. 
+Loans: Up to 18,000 ILS. Link: https://loans.inz.org.il/`;
 
-// ============================================================
-// LAYER 3: SYSTEM PROMPT (THE BRAIN)
-// ============================================================
-const SYSTEM_PROMPT = `
-Role: You are the "ZDVO Digital Concierge" (קונסיירז' דיגיטלי ארגון נכי צה"ל). 
-Goal: Stop users from scrolling and searching. Provide direct synthesized answers.
-
-TONE:
-- Professional, respectful, and concise. 
-- You are passive: only speak when asked. 
-- Use Hebrew as default. Support English, Arabic, Russian, Spanish, and Amharic.
-
-KEY KNOWLEDGE & RULES:
-1. LOANS: The Mutual Aid Fund (הקרן לעזרה הדדית) provides loans up to ₪18,000 to ZDVO members. Link: https://loans.inz.org.il/
-2. ELIGIBILITY: Members must have 10%+ disability rating from MOD.
-3. STORYTELLING: Instead of just links, explain the IMPACT. (e.g., "הלוואה זו נועדה לסייע לך לשמור על עצמאות ואיכות חיים").
-4. PRIVACY: Never ask for or show medical/personal data. Direct to "Ezor Ishi" (Personal Area) for specific file status.
-5. NAVIGATION: If the user mentions a city like Modi'in, tell them the closest Beit HaLohem (Tel Aviv or Jerusalem).
-
-FORMATTING:
-- Use clear bullet points.
-- No markdown bolding. 
-- Always end with a clear Call to Action (CTA) link.
-`;
-
-// ============================================================
-// LAYER 4: GEMINI API LOGIC
-// ============================================================
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 app.post("/api/chat", async (req, res) => {
     try {
         const { messages } = req.body;
-        
-        if (!messages || !Array.isArray(messages)) {
-            return res.status(400).json({ reply: "Invalid request format." });
-        }
+        if (!messages) return res.status(400).json({ reply: "No messages provided." });
 
         const history = messages.slice(-10).map(m => ({
             role: m.role === "user" ? "user" : "model",
@@ -117,27 +69,24 @@ app.post("/api/chat", async (req, res) => {
         const data = await response.json();
 
         if (data.error) {
-            console.error("Gemini API Error:", data.error);
-            return res.status(500).json({ reply: "חלה שגיאה מול שרת ה-AI." });
+            console.error("Gemini Error:", data.error);
+            return res.status(500).json({ reply: "שגיאה בשרת ה-AI." });
         }
 
-        // התיקון שביצענו כאן:
-        let reply = data.candidates?.?.content?.parts?.?.text || "מצטער, חלה שגיאה במערכת. נסה שוב מאוחר יותר.";
+        // השורה המתוקנת:
+        const reply = data.candidates && data.candidates && data.candidates.content && data.candidates.content.parts && data.candidates.content.parts 
+            ? data.candidates.content.parts.text 
+            : "מצטער, לא הצלחתי לעבד את התשובה.";
 
         res.json({ reply });
 
     } catch (err) {
-        console.error("Chat Error:", err);
-        res.status(500).json({ reply: "משהו השתבש בשרת. נסה שוב." });
+        console.error("Server Error:", err);
+        res.status(500).json({ reply: "משהו השתבש." });
     }
 });
 
-// ============================================================
-// START SERVER
-// ============================================================
-app.get("/health", (req, res) => res.status(200).send("ZDVO Concierge Active"));
+app.get("/health", (req, res) => res.status(200).send("OK"));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 ZDVO Concierge running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));
