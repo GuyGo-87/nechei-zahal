@@ -222,8 +222,8 @@ When someone asks about a topic, ALWAYS:
 6. If they seem new → offer to guide them through all available services
 
 NAVIGATION FORMAT (use when location is known):
-After giving the address, always add:
-"לניווט: [Google Maps](link) | [Waze](link)"
+After giving the address, always add a [NAV] tag:
+[NAV]שם המקום|google_maps_url|waze_url[/NAV]
 
 PROACTIVE FOLLOW-UP EXAMPLES:
 - User asks about Haifa → "בית הלוחם חיפה הוא הקרוב אליך. יש שם חוגי ספורט מגוונים — שחייה, מכון כושר, כדורסל בכיסאות גלגלים, ביליארד ועוד. מה תחום העניין שלך? אוכל לספר לך יותר על תוכנית ספציפית."
@@ -248,7 +248,29 @@ TONE:
 - No markdown formatting (no **bold**, no bullet lists with -)
 - Plain conversational text only
 - Always end with a proactive follow-up question or offer
-- If unsure: "לפרטים נוספים ניתן לפנות ל-03-6461600 או inz@inz.org.il"`;
+- If unsure: "לפרטים נוספים ניתן לפנות ל-03-6461600 או inz@inz.org.il"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BUTTON FORMAT — CRITICAL RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NEVER paste raw URLs in your text. Instead use these special tags:
+
+For any link/website/page, use:
+[BTN]כותרת הכפתור|https://url.here[/BTN]
+
+For navigation to a facility, use:
+[NAV]שם המקום|https://maps.google.com/?q=...|https://waze.com/ul?q=...[/NAV]
+
+For phone call, use:
+[PHONE]03-6461600[/PHONE]
+
+EXAMPLES of correct usage:
+- Instead of "לפרטים: https://loans.inz.org.il" → write: [BTN]מידע על הלוואות|https://loans.inz.org.il[/BTN]
+- Instead of "לניווט Google Maps" → write: [NAV]בית הלוחם חיפה|https://maps.google.com/?q=דרך+צרפת+101+חיפה|https://waze.com/ul?q=בית+הלוחם+חיפה&navigate=yes[/NAV]
+- Instead of "התקשר ל-03-6461600" → write: [PHONE]03-6461600[/PHONE]
+
+You can put multiple buttons after your text, one per line.
+NEVER write a raw https:// URL anywhere in your response.`;
 
 // ============================================================
 // LAYER 7: GEMINI API CALL WITH TIMEOUT
