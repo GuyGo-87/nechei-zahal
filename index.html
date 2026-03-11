@@ -357,14 +357,17 @@
             transform: translateY(-1px); box-shadow: 0 6px 16px rgba(232,96,28,0.3);
         }
         .msg-btn-phone {
-            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-            color: #166534;
-            border: 1.5px solid rgba(22,101,52,0.2);
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: white;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            justify-content: center;
         }
         .msg-btn-phone:hover {
-            background: linear-gradient(135deg, #16a34a, #15803d);
+            background: linear-gradient(135deg, #15803d, #166534);
             color: white; border-color: transparent;
-            transform: translateY(-1px); box-shadow: 0 6px 16px rgba(22,163,74,0.3);
+            transform: translateY(-1px); box-shadow: 0 6px 16px rgba(22,163,74,0.35);
         }
         .msg-btn-icon { font-size: 15px; flex-shrink: 0; }
         .msg-btn-nav-wrap { display: flex; gap: 7px; width: 100%; }
@@ -372,58 +375,56 @@
 
         /* ── Distance Card ── */
         .dist-card {
-            background: linear-gradient(135deg, #f0f4ff, #e8f0fe);
-            border: 1.5px solid rgba(0,79,159,0.2);
-            border-radius: 14px;
-            padding: 14px 16px;
+            background: linear-gradient(135deg, #f0f5ff 0%, #fef6f2 100%);
+            border: 1.5px solid rgba(0,79,159,0.15);
+            border-radius: 16px;
+            padding: 16px 18px;
             margin-top: 10px;
-            position: relative;
-            overflow: hidden;
         }
-        .dist-card::before {
-            content: '';
-            position: absolute;
-            top: 0; right: 0;
-            width: 80px; height: 80px;
-            background: radial-gradient(circle, rgba(232,96,28,0.1), transparent 70%);
-        }
-        .dist-card-title {
-            font-size: 11px;
-            font-weight: 700;
+        .dist-card-header { margin-bottom: 10px; }
+        .dist-card-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(0,79,159,0.08);
             color: var(--navy);
+            font-size: 10px;
+            font-weight: 700;
             letter-spacing: 1px;
             text-transform: uppercase;
-            margin-bottom: 10px;
-            opacity: 0.7;
+            padding: 4px 10px;
+            border-radius: 999px;
         }
-        .dist-card-rows { display: flex; gap: 10px; }
-        .dist-card-row {
-            flex: 1;
-            background: white;
-            border-radius: 10px;
-            padding: 10px 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            box-shadow: 0 2px 8px rgba(0,45,98,0.07);
+        .dist-card-sentence {
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--text);
+            margin-bottom: 14px;
         }
-        .dist-card-icon { font-size: 20px; }
-        .dist-card-km {
-            font-size: 20px;
+        .dist-highlight {
             font-weight: 800;
             color: var(--navy);
-            line-height: 1;
+            font-size: 17px;
         }
-        .dist-card-time {
-            font-size: 12px;
-            color: var(--orange);
+        .dist-card-actions { display: flex; gap: 8px; }
+        .dist-nav-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 9px 12px;
+            border-radius: 12px;
+            font-size: 13px;
             font-weight: 700;
+            text-decoration: none;
+            background: var(--navy);
+            color: white;
+            transition: all 0.18s ease;
         }
-        .dist-card-label {
-            font-size: 10px;
-            color: var(--text-muted);
-        }
+        .dist-nav-btn:hover { background: var(--navy-light); transform: translateY(-1px); }
+        .dist-waze { background: var(--orange); }
+        .dist-waze:hover { background: #c04e0e; }
         .dist-card-loading {
             display: flex;
             align-items: center;
@@ -431,7 +432,9 @@
             color: var(--text-muted);
             font-size: 13px;
             padding: 4px 0;
+            direction: rtl;
         }
+        .dist-card-nodata { color: var(--text-muted); font-size: 13px; }
         .dist-spinner {
             width: 14px; height: 14px;
             border: 2px solid rgba(0,79,159,0.2);
@@ -471,6 +474,7 @@
                 <select id="lang-selector" onchange="changeLang()" aria-label="בחר שפה">
                     <option value="he">עברית</option>
                     <option value="en">English</option>
+                    <option value="fr">Français</option>
                     <option value="es">Español</option>
                     <option value="ru">Русский</option>
                     <option value="ar">العربية</option>
@@ -688,6 +692,31 @@
                 { icon: '&#127973;', label: 'ኢንሹራንስ', query: 'ስለ ኢንሹራንስ መረጃ' },
                 { icon: '&#128737;', label: 'የብረት ሰይፍ', query: 'ለብረት ሰይፍ ቆሰሉ መረጃ' },
             ]
+        },
+        fr: {
+            dir: 'ltr', lang: 'fr',
+            greeting: '__DYNAMIC__',
+            headerTitle: 'Anciens Combattants FDI',
+            headerSubtitle: 'Actif et prêt à vous aider',
+            welcomeStrong: 'Bienvenue',
+            welcomeSub: 'Je suis ici pour vous aider à trouver des informations sur vos droits, prêts, bourses et plus encore.',
+            placeholder: 'Posez-moi une question...',
+            shortcutsLabel: 'Sujets populaires',
+            accessTitle: '&#9855; Accessibilité',
+            txtLarge: 'Grand texte',
+            txtContrast: 'Contraste élevé',
+            txtVoice: 'Lecture vocale',
+            txtReset: 'Réinitialiser',
+            footerText: 'Propulsé par',
+            connError: 'Erreur de connexion. Veuillez réessayer.',
+            shortcuts: [
+                { icon: '&#128176;', label: 'Prêts', query: 'Parlez-moi des prêts disponibles' },
+                { icon: '&#127891;', label: 'Bourses', query: 'Informations sur les bourses' },
+                { icon: '&#127968;', label: 'Beit HaLochem', query: 'Quel est le Beit HaLochem le plus proche?' },
+                { icon: '&#128209;', label: 'Droits', query: 'Quels sont mes droits?' },
+                { icon: '&#127973;', label: 'Assurances', query: 'Informations sur les assurances' },
+                { icon: '&#128737;', label: 'Épées de fer', query: 'Informations pour les blessés Épées de fer' },
+            ]
         }
     };
 
@@ -743,17 +772,17 @@
         const todayHoliday = holidayList && holidayList.find(h => h.m === month && h.d === date);
 
         // Time of day
-        let timeGreet = { he:'', en:'', es:'', ru:'', ar:'', am:'' };
+        let timeGreet = { he:'', en:'', fr:'', es:'', ru:'', ar:'', am:'' };
         if (hour >= 5 && hour < 12) {
-            timeGreet = { he:'בוקר טוב', en:'Good morning', es:'Buenos días', ru:'Доброе утро', ar:'صباح الخير', am:'እንደምን አደሩ' };
+            timeGreet = { he:'בוקר טוב', en:'Good morning', fr:'Bonjour', es:'Buenos días', ru:'Доброе утро', ar:'صباح الخير', am:'እንደምን አደሩ' };
         } else if (hour >= 12 && hour < 14) {
-            timeGreet = { he:'צהריים טובים', en:'Good afternoon', es:'Buenas tardes', ru:'Добрый день', ar:'مساء النور', am:'ሰላም' };
+            timeGreet = { he:'צהריים טובים', en:'Good afternoon', fr:'Bon après-midi', es:'Buenas tardes', ru:'Добрый день', ar:'مساء النور', am:'ሰላም' };
         } else if (hour >= 14 && hour < 18) {
-            timeGreet = { he:'אחר הצהריים טובים', en:'Good afternoon', es:'Buenas tardes', ru:'Добрый день', ar:'مساء النور', am:'ሰላም' };
+            timeGreet = { he:'אחר הצהריים טובים', en:'Good afternoon', fr:'Bon après-midi', es:'Buenas tardes', ru:'Добрый день', ar:'مساء النور', am:'ሰላም' };
         } else if (hour >= 18 && hour < 22) {
-            timeGreet = { he:'ערב טוב', en:'Good evening', es:'Buenas noches', ru:'Добрый вечер', ar:'مساء الخير', am:'እንደምን አመሻሁ' };
+            timeGreet = { he:'ערב טוב', en:'Good evening', fr:'Bonsoir', es:'Buenas noches', ru:'Добрый вечер', ar:'مساء الخير', am:'እንደምን አመሻሁ' };
         } else {
-            timeGreet = { he:'לילה טוב', en:'Good night', es:'Buenas noches', ru:'Доброй ночи', ar:'تصبح على خير', am:'ሌሊቱን መልካም' };
+            timeGreet = { he:'לילה טוב', en:'Good night', fr:'Bonne nuit', es:'Buenas noches', ru:'Доброй ночи', ar:'تصبح على خير', am:'ሌሊቱን መልካም' };
         }
 
         // Shabbat special
@@ -812,6 +841,10 @@
             lines.push(`${greet} 👋`);
             lines.push(`የIDF አካል ጉዳተኞች ድርጅት ረዳት ነኝ። አገልግሎትዎ ያስመሰግናል።`);
             lines.push(`እንዴት ልረዳዎ?`);
+        } else if (lang === 'fr') {
+            lines.push(`${greet} 👋`);
+            lines.push(`Je suis l'assistant intelligent de l'Organisation des Vétérans Handicapés de Tsahal. Merci pour votre service — nous sommes là pour vous.`);
+            lines.push(`Comment puis-je vous aider?`);
         }
 
         return lines.join('\n');
@@ -875,7 +908,7 @@
         chatHistory = [];
 
         // Inject a hidden user+assistant exchange that locks the AI into the chosen language
-        const langNames = { he: 'Hebrew', en: 'English', es: 'Spanish', ru: 'Russian', ar: 'Arabic', am: 'Amharic' };
+        const langNames = { he: 'Hebrew', en: 'English', fr: 'French', es: 'Spanish', ru: 'Russian', ar: 'Arabic', am: 'Amharic' };
         const langName = langNames[code] || 'Hebrew';
         chatHistory.push({ role: 'user',      content: `Please respond only in ${langName} from now on.` });
         chatHistory.push({ role: 'assistant', content: `Understood. I will respond only in ${langName}.` });
@@ -898,7 +931,7 @@
             bubble.classList.add('open');
             if (chatHistory.length === 0) {
                 const code = document.getElementById('lang-selector').value || 'he';
-                const langNames = { he: 'Hebrew', en: 'English', es: 'Spanish', ru: 'Russian', ar: 'Arabic', am: 'Amharic' };
+                const langNames = { he: 'Hebrew', en: 'English', fr: 'French', es: 'Spanish', ru: 'Russian', ar: 'Arabic', am: 'Amharic' };
                 const langName = langNames[code] || 'Hebrew';
                 chatHistory.push({ role: 'user',      content: `Please respond only in ${langName} from now on.` });
                 chatHistory.push({ role: 'assistant', content: `Understood. I will respond only in ${langName}.` });
@@ -965,35 +998,29 @@
     function renderDistCard(origin, facility, actDiv) {
         const card = document.createElement('div');
         card.className = 'dist-card';
-        card.innerHTML = `<div class="dist-card-title">📍 מרחק מ${origin} לבית הלוחם ${facility}</div>
-            <div class="dist-card-loading"><div class="dist-spinner"></div>מחשב מסלול...</div>`;
+        card.innerHTML = `<div class="dist-card-loading"><div class="dist-spinner"></div>&rlm;מחשב מסלול מ${origin}...</div>`;
         actDiv.appendChild(card);
 
         fetchDistance(origin, facility).then(data => {
-            if (!data || (!data.driving && !data.walking)) {
-                card.querySelector('.dist-card-loading').textContent = 'לא ניתן לחשב מרחק כעת';
+            if (!data || !data.driving) {
+                card.innerHTML = `<div class="dist-card-nodata">לא ניתן לחשב מרחק כעת</div>`;
                 return;
             }
-            const rows = [];
-            if (data.driving) rows.push(`
-                <div class="dist-card-row">
-                    <span class="dist-card-icon">🚗</span>
-                    <span class="dist-card-km">${data.driving.km} ק"מ</span>
-                    <span class="dist-card-time">${data.driving.timeStr}</span>
-                    <span class="dist-card-label">נהיגה</span>
-                </div>`);
-            if (data.walking) rows.push(`
-                <div class="dist-card-row">
-                    <span class="dist-card-icon">🚶</span>
-                    <span class="dist-card-km">${data.walking.km} ק"מ</span>
-                    <span class="dist-card-time">${data.walking.timeStr}</span>
-                    <span class="dist-card-label">הליכה</span>
-                </div>`);
+            const d = data.driving;
             card.innerHTML = `
-                <div class="dist-card-title">📍 מרחק מ${origin} לבית הלוחם ${facility}</div>
-                <div class="dist-card-rows">${rows.join('')}</div>`;
-
-            // Scroll to show new card
+                <div class="dist-card-header">
+                    <span class="dist-card-badge">🗺️ לפי Google Maps</span>
+                </div>
+                <div class="dist-card-sentence">
+                    בית הלוחם <strong>${facility}</strong> נמצא רק
+                    <span class="dist-highlight">${d.km} ק"מ</span>
+                    ו-<span class="dist-highlight">${d.timeStr}</span>
+                    נסיעה מ${origin}
+                </div>
+                <div class="dist-card-actions">
+                    <a class="dist-nav-btn" href="https://maps.google.com/?q=בית+הלוחם+${encodeURIComponent(facility)}" target="_blank" rel="noopener">🗺️ Google Maps</a>
+                    <a class="dist-nav-btn dist-waze" href="https://waze.com/ul?q=בית+הלוחם+${encodeURIComponent(facility)}&navigate=yes" target="_blank" rel="noopener">🚗 Waze</a>
+                </div>`;
             const container = document.getElementById('messages-container');
             container.scrollTop = container.scrollHeight;
         });
