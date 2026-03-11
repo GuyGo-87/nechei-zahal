@@ -615,8 +615,16 @@
         // Reset messages with greeting in new language
         document.getElementById('messages-container').innerHTML = '';
         chatHistory = [];
+
+        // Inject a hidden user+assistant exchange that locks the AI into the chosen language
+        const langNames = { he: 'Hebrew', en: 'English', es: 'Spanish', ru: 'Russian', ar: 'Arabic', am: 'Amharic' };
+        const langName = langNames[code] || 'Hebrew';
+        chatHistory.push({ role: 'user',      content: `Please respond only in ${langName} from now on.` });
+        chatHistory.push({ role: 'assistant', content: `Understood. I will respond only in ${langName}.` });
+
+        const greetingText = getLang().greeting.replace(/&#\d+;/g, '').replace(/&[a-z]+;/g, '').trim();
         addMessage(getLang().greeting, 'bot-msg');
-        chatHistory.push({ role: 'assistant', content: getLang().greeting });
+        chatHistory.push({ role: 'assistant', content: greetingText });
     }
 
     // ── Chat ──
@@ -631,8 +639,14 @@
             win.style.animation = 'slideUp 0.3s cubic-bezier(.34,1.36,.64,1)';
             bubble.classList.add('open');
             if (chatHistory.length === 0) {
+                const code = document.getElementById('lang-selector').value || 'he';
+                const langNames = { he: 'Hebrew', en: 'English', es: 'Spanish', ru: 'Russian', ar: 'Arabic', am: 'Amharic' };
+                const langName = langNames[code] || 'Hebrew';
+                chatHistory.push({ role: 'user',      content: `Please respond only in ${langName} from now on.` });
+                chatHistory.push({ role: 'assistant', content: `Understood. I will respond only in ${langName}.` });
+                const greetingText = getLang().greeting.replace(/&#\d+;/g, '').replace(/&[a-z]+;/g, '').trim();
                 addMessage(getLang().greeting, 'bot-msg');
-                chatHistory.push({ role: 'assistant', content: getLang().greeting });
+                chatHistory.push({ role: 'assistant', content: greetingText });
             }
             setTimeout(() => document.getElementById('user-input').focus(), 320);
         } else {
