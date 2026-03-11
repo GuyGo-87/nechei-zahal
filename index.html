@@ -369,6 +369,78 @@
         .msg-btn-icon { font-size: 15px; flex-shrink: 0; }
         .msg-btn-nav-wrap { display: flex; gap: 7px; width: 100%; }
         .msg-btn-nav-wrap .msg-btn-nav { flex: 1; justify-content: center; }
+
+        /* ── Distance Card ── */
+        .dist-card {
+            background: linear-gradient(135deg, #f0f4ff, #e8f0fe);
+            border: 1.5px solid rgba(0,79,159,0.2);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        .dist-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 80px; height: 80px;
+            background: radial-gradient(circle, rgba(232,96,28,0.1), transparent 70%);
+        }
+        .dist-card-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--navy);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            opacity: 0.7;
+        }
+        .dist-card-rows { display: flex; gap: 10px; }
+        .dist-card-row {
+            flex: 1;
+            background: white;
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            box-shadow: 0 2px 8px rgba(0,45,98,0.07);
+        }
+        .dist-card-icon { font-size: 20px; }
+        .dist-card-km {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--navy);
+            line-height: 1;
+        }
+        .dist-card-time {
+            font-size: 12px;
+            color: var(--orange);
+            font-weight: 700;
+        }
+        .dist-card-label {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+        .dist-card-loading {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 13px;
+            padding: 4px 0;
+        }
+        .dist-spinner {
+            width: 14px; height: 14px;
+            border: 2px solid rgba(0,79,159,0.2);
+            border-top-color: var(--navy);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            flex-shrink: 0;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -866,10 +938,65 @@
             return '';
         });
 
+        // Extract [DIST]origin|facility[/DIST]
+        text = text.replace(/\[DIST\](.*?)\|(.*?)\[\/DIST\]/gs, (_, origin, facility) => {
+            actions.push({ type: 'dist', origin: origin.trim(), facility: facility.trim() });
+            return '';
+        });
+
         // Clean up leftover raw URLs
         text = text.replace(/https?:\/\/\S+/g, '');
 
         return { text: text.trim(), actions };
+    }
+
+    async function fetchDistance(origin, facility) {
+        try {
+            const resp = await fetch('/api/distance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ origin, facility })
+            });
+            if (!resp.ok) return null;
+            return await resp.json();
+        } catch { return null; }
+    }
+
+    function renderDistCard(origin, facility, actDiv) {
+        const card = document.createElement('div');
+        card.className = 'dist-card';
+        card.innerHTML = `<div class="dist-card-title">📍 מרחק מ${origin} לבית הלוחם ${facility}</div>
+            <div class="dist-card-loading"><div class="dist-spinner"></div>מחשב מסלול...</div>`;
+        actDiv.appendChild(card);
+
+        fetchDistance(origin, facility).then(data => {
+            if (!data || (!data.driving && !data.walking)) {
+                card.querySelector('.dist-card-loading').textContent = 'לא ניתן לחשב מרחק כעת';
+                return;
+            }
+            const rows = [];
+            if (data.driving) rows.push(`
+                <div class="dist-card-row">
+                    <span class="dist-card-icon">🚗</span>
+                    <span class="dist-card-km">${data.driving.km} ק"מ</span>
+                    <span class="dist-card-time">${data.driving.timeStr}</span>
+                    <span class="dist-card-label">נהיגה</span>
+                </div>`);
+            if (data.walking) rows.push(`
+                <div class="dist-card-row">
+                    <span class="dist-card-icon">🚶</span>
+                    <span class="dist-card-km">${data.walking.km} ק"מ</span>
+                    <span class="dist-card-time">${data.walking.timeStr}</span>
+                    <span class="dist-card-label">הליכה</span>
+                </div>`);
+            card.innerHTML = `
+                <div class="dist-card-title">📍 מרחק מ${origin} לבית הלוחם ${facility}</div>
+                <div class="dist-card-rows">${rows.join('')}</div>`;
+
+            // Scroll to show new card
+            const container = document.getElementById('messages-container');
+            container.scrollTop = container.scrollHeight;
+        });
     }
 
     function renderBotContent(raw) {
@@ -904,6 +1031,12 @@
                     btn.innerHTML = '<span class="msg-btn-icon">🔗</span>' + a.label;
                     actDiv.appendChild(btn);
                 } else if (a.type === 'nav') {
+                    if (a.name) {
+                        const lbl = document.createElement('div');
+                        lbl.style.cssText = 'font-size:11px;color:var(--text-muted);margin-bottom:4px;font-weight:600;';
+                        lbl.textContent = '📍 ' + a.name;
+                        actDiv.appendChild(lbl);
+                    }
                     const wrap = document.createElement('div');
                     wrap.className = 'msg-btn-nav-wrap';
                     const g = document.createElement('a');
@@ -916,12 +1049,6 @@
                     w.innerHTML = '<span class="msg-btn-icon">🚗</span> Waze';
                     wrap.appendChild(g);
                     wrap.appendChild(w);
-                    if (a.name) {
-                        const lbl = document.createElement('div');
-                        lbl.style.cssText = 'font-size:11px;color:var(--text-muted);margin-bottom:4px;font-weight:600;';
-                        lbl.textContent = '📍 ' + a.name;
-                        actDiv.appendChild(lbl);
-                    }
                     actDiv.appendChild(wrap);
                 } else if (a.type === 'phone') {
                     const btn = document.createElement('a');
@@ -929,6 +1056,8 @@
                     btn.href = 'tel:' + a.num.replace(/-/g,'');
                     btn.innerHTML = '<span class="msg-btn-icon">📞</span>' + a.num;
                     actDiv.appendChild(btn);
+                } else if (a.type === 'dist') {
+                    renderDistCard(a.origin, a.facility, actDiv);
                 }
             });
 
