@@ -469,7 +469,7 @@
     const LANGS = {
         he: {
             dir: 'rtl', lang: 'he',
-            greeting: 'שלום! אני העוזר החכם של ארגון נכי צה"ל. מה תרצה לדעת היום? &#128075;',
+            greeting: '__DYNAMIC__',
             headerTitle: 'ארגון נכי צה"ל',
             headerSubtitle: 'פעיל ומוכן לעזור',
             welcomeStrong: 'ברוכים הבאים לארגון נכי צה"ל',
@@ -494,7 +494,7 @@
         },
         en: {
             dir: 'ltr', lang: 'en',
-            greeting: 'Hello! I\'m the smart assistant of the IDF Disabled Veterans Organization. What would you like to know today? &#128075;',
+            greeting: '__DYNAMIC__',
             headerTitle: 'IDF Disabled Veterans',
             headerSubtitle: 'Active & ready to help',
             welcomeStrong: 'Welcome to IDF Disabled Veterans Org',
@@ -519,7 +519,7 @@
         },
         es: {
             dir: 'ltr', lang: 'es',
-            greeting: '¡Hola! Soy el asistente inteligente de la Organización de Veteranos Discapacitados de las FDI. ¿Qué deseas saber hoy? &#128075;',
+            greeting: '__DYNAMIC__',
             headerTitle: 'Veteranos FDI Discapacitados',
             headerSubtitle: 'Activo y listo para ayudar',
             welcomeStrong: 'Bienvenido a la Org. de Veteranos FDI',
@@ -544,7 +544,7 @@
         },
         ru: {
             dir: 'ltr', lang: 'ru',
-            greeting: 'Здравствуйте! Я умный помощник организации инвалидов ЦАХАЛа. Что вы хотите узнать сегодня? &#128075;',
+            greeting: '__DYNAMIC__',
             headerTitle: 'Инвалиды ЦАХАЛа',
             headerSubtitle: 'Активен и готов помочь',
             welcomeStrong: 'Добро пожаловать в организацию инвалидов ЦАХАЛа',
@@ -569,7 +569,7 @@
         },
         ar: {
             dir: 'rtl', lang: 'ar',
-            greeting: 'مرحباً! أنا المساعد الذكي لمنظمة معاقي الجيش الإسرائيلي. ماذا تريد أن تعرف اليوم؟ &#128075;',
+            greeting: '__DYNAMIC__',
             headerTitle: 'معاقو الجيش الإسرائيلي',
             headerSubtitle: 'نشط ومستعد للمساعدة',
             welcomeStrong: 'مرحباً بك في منظمة معاقي الجيش الإسرائيلي',
@@ -594,7 +594,7 @@
         },
         am: {
             dir: 'ltr', lang: 'am',
-            greeting: 'ሰላም! እኔ የIDF አካል ጉዳተኞች ድርጅት ብልህ ረዳት ነኝ። ዛሬ ምን ማወቅ ይፈልጋሉ? &#128075;',
+            greeting: '__DYNAMIC__',
             headerTitle: 'IDF አካል ጉዳተኞች',
             headerSubtitle: 'ለመርዳት ዝግጁ ነኝ',
             welcomeStrong: 'እንኳን ደህና መጡ',
@@ -620,6 +620,131 @@
     };
 
     let currentLang = 'he';
+
+    // ── Smart Contextual Greeting ──
+    function getSmartGreeting(lang) {
+        const now = new Date();
+        const hour = now.getHours();
+        const day  = now.getDay(); // 0=Sun, 6=Sat
+        const month = now.getMonth() + 1; // 1-based
+        const date  = now.getDate();
+
+        // Jewish Holidays (approximate Gregorian dates, good for 2024-2026)
+        const holidays = {
+            he: [
+                { m:3,  d:13, name:'פורים שמח! 🎭' },
+                { m:3,  d:14, name:'פורים שמח! 🎭' },
+                { m:4,  d:12, name:'חג פסח שמח! 🍷' },
+                { m:4,  d:13, name:'חג פסח שמח! 🍷' },
+                { m:4,  d:18, name:'חג פסח שמח! 🍷' },
+                { m:4,  d:19, name:'חג פסח שמח! 🍷' },
+                { m:4,  d:23, name:'יום העצמאות שמח! 🇮🇱' },
+                { m:6,  d:1,  name:'חג שבועות שמח! 📜' },
+                { m:6,  d:2,  name:'חג שבועות שמח! 📜' },
+                { m:9,  d:22, name:'שנה טובה! ראש השנה שמח 🍎' },
+                { m:9,  d:23, name:'שנה טובה! ראש השנה שמח 🍎' },
+                { m:10, d:1,  name:'גמר חתימה טובה! צום קל ביום כיפור 🕍' },
+                { m:10, d:6,  name:'חג סוכות שמח! 🌿' },
+                { m:10, d:7,  name:'חג סוכות שמח! 🌿' },
+                { m:10, d:13, name:'חג שמיני עצרת שמח! 🎉' },
+                { m:10, d:14, name:'חג שמחת תורה שמח! 📖' },
+                { m:12, d:25, name:'חנוכה שמח! 🕎' },
+                { m:12, d:26, name:'חנוכה שמח! 🕎' },
+                { m:12, d:27, name:'חנוכה שמח! 🕎' },
+                { m:1,  d:1,  name:'חנוכה שמח! 🕎' },
+                { m:1,  d:2,  name:'חנוכה שמח! 🕎' },
+            ],
+            en: [
+                { m:9,  d:22, name:"Shana Tova! Happy Jewish New Year 🍎" },
+                { m:4,  d:12, name:"Happy Passover! 🍷" },
+                { m:4,  d:23, name:"Happy Independence Day! 🇮🇱" },
+                { m:12, d:25, name:"Happy Hanukkah! 🕎" },
+            ]
+        };
+
+        // Days in Hebrew
+        const daysHe = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+        const daysEn = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+        // Check for holiday
+        const holidayList = holidays[lang] || holidays['en'];
+        const todayHoliday = holidayList && holidayList.find(h => h.m === month && h.d === date);
+
+        // Time of day
+        let timeGreet = { he:'', en:'', es:'', ru:'', ar:'', am:'' };
+        if (hour >= 5 && hour < 12) {
+            timeGreet = { he:'בוקר טוב', en:'Good morning', es:'Buenos días', ru:'Доброе утро', ar:'صباح الخير', am:'እንደምን አደሩ' };
+        } else if (hour >= 12 && hour < 14) {
+            timeGreet = { he:'צהריים טובים', en:'Good afternoon', es:'Buenas tardes', ru:'Добрый день', ar:'مساء النور', am:'ሰላም' };
+        } else if (hour >= 14 && hour < 18) {
+            timeGreet = { he:'אחר הצהריים טובים', en:'Good afternoon', es:'Buenas tardes', ru:'Добрый день', ar:'مساء النور', am:'ሰላም' };
+        } else if (hour >= 18 && hour < 22) {
+            timeGreet = { he:'ערב טוב', en:'Good evening', es:'Buenas noches', ru:'Добрый вечер', ar:'مساء الخير', am:'እንደምን አመሻሁ' };
+        } else {
+            timeGreet = { he:'לילה טוב', en:'Good night', es:'Buenas noches', ru:'Доброй ночи', ar:'تصبح على خير', am:'ሌሊቱን መልካም' };
+        }
+
+        // Shabbat special
+        const isShabbat = day === 6;
+        const isErevShabbat = day === 5 && hour >= 14;
+
+        let lines = [];
+
+        if (todayHoliday) {
+            lines.push(todayHoliday.name);
+        } else if (isShabbat) {
+            lines.push(lang === 'he' ? 'שבת שלום! 🕯️' : 'Shabbat Shalom! 🕯️');
+        } else if (isErevShabbat) {
+            lines.push(lang === 'he' ? 'שבת שלום! כבר מכינים לשבת 🕯️' : 'Shabbat Shalom! 🕯️');
+        }
+
+        // Main greeting by language
+        const dayName = lang === 'he' ? daysHe[day] : daysEn[day];
+        const greet = timeGreet[lang] || timeGreet['en'];
+
+        // Natural, varied closing questions so it doesn't feel robotic
+        const closingHe = [
+            'במה אוכל לעזור לך היום?',
+            'איך אוכל לסייע לך?',
+            'מה תרצה לדעת?',
+            'ספר לי — במה אוכל לעזור?',
+        ];
+        const closingEn = [
+            'How can I help you today?',
+            'What can I do for you?',
+            'What would you like to know?',
+        ];
+        const closing = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+        if (lang === 'he') {
+            lines.push(`${greet} 👋`);
+            lines.push(`אני העוזר החכם של ארגון נכי צה"ל. תודה על שירותך — אנחנו כאן בשבילך.`);
+            lines.push(closing(closingHe));
+        } else if (lang === 'en') {
+            lines.push(`${greet} 👋`);
+            lines.push(`I'm the smart assistant of the IDF Disabled Veterans Organization. Thank you for your service — we're here for you.`);
+            lines.push(closing(closingEn));
+        } else if (lang === 'es') {
+            lines.push(`${greet} 👋`);
+            lines.push(`Soy el asistente de la Organización de Veteranos de las FDI. Gracias por su servicio, estamos aquí para usted.`);
+            lines.push(`¿En qué puedo ayudarle?`);
+        } else if (lang === 'ru') {
+            lines.push(`${greet} 👋`);
+            lines.push(`Я помощник организации инвалидов ЦАХАЛа. Спасибо за вашу службу — мы здесь для вас.`);
+            lines.push(`Чем могу помочь?`);
+        } else if (lang === 'ar') {
+            lines.push(`${greet} 👋`);
+            lines.push(`أنا المساعد الذكي لمنظمة معاقي الجيش الإسرائيلي. شكراً لخدمتك — نحن هنا من أجلك.`);
+            lines.push(`كيف يمكنني مساعدتك؟`);
+        } else if (lang === 'am') {
+            lines.push(`${greet} 👋`);
+            lines.push(`የIDF አካል ጉዳተኞች ድርጅት ረዳት ነኝ። አገልግሎትዎ ያስመሰግናል።`);
+            lines.push(`እንዴት ልረዳዎ?`);
+        }
+
+        return lines.join('\n');
+    }
+
     let chatHistory = [];
     let voiceEnabled = false;
 
@@ -683,8 +808,8 @@
         chatHistory.push({ role: 'user',      content: `Please respond only in ${langName} from now on.` });
         chatHistory.push({ role: 'assistant', content: `Understood. I will respond only in ${langName}.` });
 
-        const greetingText = getLang().greeting.replace(/&#\d+;/g, '').replace(/&[a-z]+;/g, '').trim();
-        addMessage(getLang().greeting, 'bot-msg');
+        const greetingText = getSmartGreeting(currentLang);
+        addMessage(greetingText, 'bot-msg');
         chatHistory.push({ role: 'assistant', content: greetingText });
     }
 
@@ -705,8 +830,8 @@
                 const langName = langNames[code] || 'Hebrew';
                 chatHistory.push({ role: 'user',      content: `Please respond only in ${langName} from now on.` });
                 chatHistory.push({ role: 'assistant', content: `Understood. I will respond only in ${langName}.` });
-                const greetingText = getLang().greeting.replace(/&#\d+;/g, '').replace(/&[a-z]+;/g, '').trim();
-                addMessage(getLang().greeting, 'bot-msg');
+                const greetingText = getSmartGreeting(currentLang);
+        addMessage(greetingText, 'bot-msg');
                 chatHistory.push({ role: 'assistant', content: greetingText });
             }
             setTimeout(() => document.getElementById('user-input').focus(), 320);
@@ -753,11 +878,8 @@
 
         // Render text paragraphs
         if (text) {
-            text.split(/
-
-+/).forEach(p => {
-                p = p.replace(/
-/g, ' ').trim();
+            text.split(/\n\n+/).forEach(p => {
+                p = p.replace(/\n/g, ' ').trim();
                 if (p) {
                     const el = document.createElement('p');
                     el.style.cssText = 'margin:0 0 8px;line-height:1.6;';
