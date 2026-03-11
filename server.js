@@ -87,30 +87,9 @@ app.use("/api/chat", burstLimiter);
 app.use("/api/chat", chatLimiter);
 
 // ============================================================
-// LAYER 5: XSS CLEANING (manual — xss-clean is abandoned)
+// LAYER 5: (no xss middleware needed — input validation below
+// already enforces structure, types, and length limits)
 // ============================================================
-function sanitizeString(str) {
-    if (typeof str !== "string") return str;
-    return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#x27;");
-}
-// Sanitize req.body recursively before it hits any route
-app.use((req, res, next) => {
-    if (req.body && typeof req.body === "object") {
-        const sanitize = (obj) => {
-            for (const key in obj) {
-                if (typeof obj[key] === "string") obj[key] = sanitizeString(obj[key]);
-                else if (typeof obj[key] === "object" && obj[key] !== null) sanitize(obj[key]);
-            }
-        };
-        sanitize(req.body);
-    }
-    next();
-});
 
 // ============================================================
 // LAYER 6: INPUT VALIDATION
@@ -254,10 +233,21 @@ app.post("/api/chat", validateChatInput, async (req, res) => {
         const geminiRes = await callGemini(contents);
         const data = await geminiRes.json();
 
-        // Log full Gemini response for debugging
+        // Gemini returned an error object
         if (data.error) {
-            console.error("[GEMINI ERROR]", JSON.stringify(data.error));
-            throw new Error(data.error.message);
+            const code = data.error.code || 0;
+            const msg  = data.error.message || "unknown";
+            console.error(`[GEMINI ERROR] code=${code} message=${msg}`);
+
+            // Quota exceeded (429) — tell user clearly
+            if (code === 429 || msg.toLowerCase().includes("quota")) {
+                return res.status(503).json({ reply: "מערכת ה-AI עמוסה כרגע. אנא נסה שוב בעוד מספר דקות." });
+            }
+            // Invalid API key (400/403)
+            if (code === 400 || code === 403) {
+                return res.status(503).json({ reply: "שגיאת הגדרה במערכת. אנא צור קשר עם מנהל האתר." });
+            }
+            throw new Error(`Gemini ${code}: ${msg}`);
         }
 
         const reply = data.candidates?.[0]?.content?.parts?.[0]?.text
