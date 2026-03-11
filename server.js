@@ -87,10 +87,30 @@ app.use("/api/chat", burstLimiter);
 app.use("/api/chat", chatLimiter);
 
 // ============================================================
-// LAYER 5: XSS CLEANING
+// LAYER 5: XSS CLEANING (manual — xss-clean is abandoned)
 // ============================================================
-const xss = require("xss-clean");
-app.use(xss());
+function sanitizeString(str) {
+    if (typeof str !== "string") return str;
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#x27;");
+}
+// Sanitize req.body recursively before it hits any route
+app.use((req, res, next) => {
+    if (req.body && typeof req.body === "object") {
+        const sanitize = (obj) => {
+            for (const key in obj) {
+                if (typeof obj[key] === "string") obj[key] = sanitizeString(obj[key]);
+                else if (typeof obj[key] === "object" && obj[key] !== null) sanitize(obj[key]);
+            }
+        };
+        sanitize(req.body);
+    }
+    next();
+});
 
 // ============================================================
 // LAYER 6: INPUT VALIDATION
