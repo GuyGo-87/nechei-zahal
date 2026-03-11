@@ -494,8 +494,8 @@
                     <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 100 10A5 5 0 0012 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
                 </div>
                 <div>
-                    <div class="header-title" id="header-title">
-                        <span id="agent-name-display"></span><span id="agent-org-display" style="opacity:0.55;font-weight:400;margin-right:6px;margin-left:6px;font-size:12px;"></span>
+                    <div class="header-title" id="header-title" style="display:flex;align-items:baseline;gap:6px;flex-wrap:nowrap;">
+                        <span id="agent-name-display"></span><span id="agent-org-display" style="opacity:0.5;font-weight:400;font-size:11px;letter-spacing:0.2px;white-space:nowrap;"></span>
                     </div>
                     <div class="header-subtitle">
                         <span class="status-dot"></span>
@@ -615,7 +615,7 @@
         en: {
             dir: 'ltr', lang: 'en',
             greeting: '__DYNAMIC__',
-            headerTitle: 'IDF Disabled Veterans',
+            headerTitle: 'IDF Disabled Veterans Organization',
             headerSubtitle: 'Active & ready to help',
             welcomeStrong: 'Welcome to IDF Disabled Veterans Org',
             welcomeSub: 'I\'m here to help you find information on rights, loans, scholarships and more.',
@@ -979,15 +979,15 @@
         if (nameEl) nameEl.textContent = getAgentName(code);
         const orgShort = {
             he: 'ארגון נכי צה"ל',
-            en: 'IDF Disabled Veterans',
-            fr: 'Vétérans de Tsahal',
-            es: 'Veteranos FDI',
-            ru: 'Инвалиды ЦАХАЛа',
-            ar: 'معاقو الجيش الإسرائيلي',
-            am: 'IDF አካል ጉዳተኞች',
+            en: 'IDF Disabled Veterans Organization',
+            fr: 'Organisation des Vétérans de Tsahal',
+            es: 'Organización de Veteranos FDI',
+            ru: 'Организация инвалидов ЦАХАЛа',
+            ar: 'منظمة معاقي الجيش الإسرائيلي',
+            am: 'IDF አካል ጉዳተኞች ድርጅት',
         };
         const orgEl = document.getElementById('agent-org-display');
-        if (orgEl) orgEl.textContent = orgShort[code] || 'INZ';
+        if (orgEl) orgEl.textContent = '· ' + (orgShort[code] || 'INZ');
 
         // Welcome banner
         document.getElementById('welcome-strong').textContent = L.welcomeStrong;
