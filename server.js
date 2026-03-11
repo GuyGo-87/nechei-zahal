@@ -392,17 +392,16 @@ app.post("/api/chat", validateChatInput, async (req, res) => {
     }
 
     try {
-        const { messages, lang } = req.body;
+        const { messages, lang, agentName } = req.body;
         const clientLang = ['he','en','fr','es','ru','ar','am'].includes(lang) ? lang : 'he';
+        const safeAgentName = ['Sharon','Ariel','Noam','Adam'].includes(agentName) ? agentName : 'Sharon';
 
-        // Detect active language from the first hidden lock message
-        let activeLang = 'Hebrew';
-        const firstMsg = messages[0]?.content || '';
-        const langMatch = firstMsg.match(/respond only in (\w+)/i);
-        if (langMatch) activeLang = langMatch[1];
+        // Map lang code to full name for the AI prompt
+        const langFullNames = { he:'Hebrew', en:'English', fr:'French', es:'Spanish', ru:'Russian', ar:'Arabic', am:'Amharic' };
+        const activeLang = langFullNames[clientLang] || 'Hebrew';
 
         // Build dynamic system prompt with language locked in
-        const dynamicPrompt = SYSTEM_PROMPT + `\n\nCRITICAL ACTIVE LANGUAGE OVERRIDE: This entire conversation MUST be in ${activeLang} only. Every single response must be in ${activeLang}. Do not use any other language under any circumstances.`;
+        const dynamicPrompt = SYSTEM_PROMPT + `\n\nCRITICAL LANGUAGE RULE: You MUST respond ONLY in ${activeLang}. Every word of your response must be in ${activeLang}. This is non-negotiable regardless of what language the user writes in.\n\nYour name in this conversation is ${safeAgentName}. If asked your name, say ${safeAgentName}.`;
 
         // Log key presence (never the key itself)
         console.log(`[CHAT] Request from ${req.ip} | GEMINI_KEY: ${!!GEMINI_API_KEY} | Messages: ${messages.length} | Lang: ${activeLang}`);
