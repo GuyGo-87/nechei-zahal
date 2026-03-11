@@ -3,166 +3,513 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZDVO Digital Concierge</title>
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>INZ | עוזר חכם</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --zdvo-blue: #004a99;
-            --zdvo-light-blue: #e6f0fa;
-            --zdvo-accent: #ffcc00;
-            --text-dark: #333;
+            --navy: #002d62;
+            --navy-mid: #003d7a;
+            --navy-light: #004f9f;
+            --orange: #e8601c;
+            --orange-light: #f07030;
+            --gold: #c8973a;
             --white: #ffffff;
+            --off-white: #f7f8fa;
+            --grey-light: #edf0f5;
+            --grey-mid: #c8cfd8;
+            --text: #1a2332;
+            --text-muted: #5a6478;
+            --shadow-sm: 0 2px 8px rgba(0,45,98,0.08);
+            --shadow-md: 0 8px 32px rgba(0,45,98,0.14);
+            --shadow-lg: 0 20px 60px rgba(0,45,98,0.20);
+            --radius: 16px;
+            --radius-sm: 10px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Assistant', sans-serif; background-color: #f4f7f9; color: var(--text-dark); }
 
-        /* Floating Bubble - Passive & Non-Intrusive */
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: var(--off-white);
+            color: var(--text);
+            direction: rtl;
+        }
+
+        /* ── Floating Bubble ── */
         #chat-bubble {
             position: fixed;
-            bottom: 25px;
-            right: 25px;
-            width: 65px;
-            height: 65px;
-            background-color: var(--zdvo-blue);
+            bottom: 28px;
+            left: 28px;
+            width: 62px;
+            height: 62px;
+            background: linear-gradient(135deg, var(--navy-light), var(--navy));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 20px rgba(0,45,98,0.35), 0 0 0 0 rgba(0,79,159,0.4);
             z-index: 1000;
-            transition: transform 0.2s;
+            transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s;
+            animation: pulse-ring 3s ease-out infinite;
         }
-        #chat-bubble:hover { transform: scale(1.1); }
-        #chat-bubble svg { width: 35px; fill: var(--white); }
+        #chat-bubble:hover {
+            transform: scale(1.08);
+            box-shadow: 0 8px 28px rgba(0,45,98,0.45), 0 0 0 0 rgba(0,79,159,0);
+        }
+        @keyframes pulse-ring {
+            0%   { box-shadow: 0 4px 20px rgba(0,45,98,0.35), 0 0 0 0 rgba(0,79,159,0.4); }
+            60%  { box-shadow: 0 4px 20px rgba(0,45,98,0.35), 0 0 0 14px rgba(0,79,159,0); }
+            100% { box-shadow: 0 4px 20px rgba(0,45,98,0.35), 0 0 0 0 rgba(0,79,159,0); }
+        }
+        #chat-bubble svg { width: 28px; height: 28px; fill: var(--white); }
 
-        /* Main Chat Window */
+        /* Notification dot */
+        #chat-bubble::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 12px;
+            height: 12px;
+            background: var(--orange);
+            border-radius: 50%;
+            border: 2px solid var(--white);
+        }
+        #chat-bubble.open::after { display: none; }
+
+        /* ── Chat Window ── */
         #chat-window {
             position: fixed;
-            bottom: 100px;
-            right: 25px;
+            bottom: 108px;
+            left: 28px;
             width: 400px;
-            max-width: 90vw;
-            height: 600px;
+            max-width: calc(100vw - 40px);
+            height: 620px;
+            max-height: calc(100vh - 140px);
             background: var(--white);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
             display: none;
             flex-direction: column;
             z-index: 999;
             overflow: hidden;
+            border: 1px solid rgba(0,45,98,0.08);
+            transform-origin: bottom left;
+            animation: slideUp 0.3s cubic-bezier(.34,1.36,.64,1);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: scale(0.92) translateY(12px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        /* Header */
+        /* ── Header ── */
         .chat-header {
-            background-color: var(--zdvo-blue);
-            color: var(--white);
-            padding: 15px;
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+            padding: 16px 18px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .chat-header::before {
+            content: '';
+            position: absolute;
+            top: -30px; left: -30px;
+            width: 120px; height: 120px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 50%;
+        }
+        .chat-header::after {
+            content: '';
+            position: absolute;
+            bottom: -40px; right: 60px;
+            width: 100px; height: 100px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 50%;
         }
 
-        /* Multilingual Selector */
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            position: relative;
+            z-index: 1;
+        }
+        .header-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1.5px solid rgba(255,255,255,0.25);
+            flex-shrink: 0;
+        }
+        .header-avatar svg { width: 20px; height: 20px; fill: white; }
+        .header-title { color: var(--white); font-size: 15px; font-weight: 700; letter-spacing: -0.2px; }
+        .header-subtitle {
+            color: rgba(255,255,255,0.65);
+            font-size: 11.5px;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 1px;
+        }
+        .status-dot {
+            width: 6px; height: 6px;
+            background: #4ade80;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 0 2px rgba(74,222,128,0.3);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            z-index: 1;
+        }
         #lang-selector {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 2px 5px;
-            border-radius: 5px;
-            font-size: 12px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.9);
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-family: 'Heebo', sans-serif;
+            font-weight: 600;
             cursor: pointer;
+            letter-spacing: 0.3px;
         }
+        .close-btn {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            width: 28px; height: 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            line-height: 1;
+        }
+        .close-btn:hover { background: rgba(255,255,255,0.22); }
 
-        /* Messages Area */
+        /* ── Welcome Banner ── */
+        .welcome-banner {
+            background: linear-gradient(135deg, #eef4ff 0%, #f5f0ff 100%);
+            border-bottom: 1px solid var(--grey-light);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .welcome-icon { font-size: 20px; }
+        .welcome-text { font-size: 12px; color: var(--text-muted); font-weight: 500; line-height: 1.4; }
+        .welcome-text strong { color: var(--navy); font-weight: 700; }
+
+        /* ── Messages ── */
         #messages-container {
             flex: 1;
-            padding: 15px;
+            padding: 16px 14px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 10px;
+            background: #fafbfd;
+            scroll-behavior: smooth;
+        }
+        #messages-container::-webkit-scrollbar { width: 4px; }
+        #messages-container::-webkit-scrollbar-track { background: transparent; }
+        #messages-container::-webkit-scrollbar-thumb { background: var(--grey-mid); border-radius: 4px; }
+
+        .msg-wrapper {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+        .msg-wrapper.user-wrapper { flex-direction: row-reverse; }
+
+        .msg-avatar-small {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--navy-light), var(--navy));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 12px;
+        }
+        .msg-avatar-small svg { width: 14px; height: 14px; fill: white; }
+
+        .msg {
+            max-width: 78%;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 13.5px;
+            line-height: 1.55;
+            font-weight: 400;
+            transition: all 0.2s;
+            animation: msgIn 0.25s cubic-bezier(.34,1.36,.64,1);
+        }
+        @keyframes msgIn {
+            from { opacity: 0; transform: translateY(6px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .msg { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 14px; line-height: 1.5; }
-        .bot-msg { background: var(--zdvo-light-blue); align-self: flex-start; border-bottom-left-radius: 2px; }
-        .user-msg { background: var(--zdvo-blue); color: var(--white); align-self: flex-end; border-bottom-right-radius: 2px; }
+        .bot-msg {
+            background: var(--white);
+            color: var(--text);
+            border-bottom-right-radius: 4px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(0,45,98,0.06);
+        }
+        .user-msg {
+            background: linear-gradient(135deg, var(--navy-light), var(--navy));
+            color: var(--white);
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 4px 14px rgba(0,45,98,0.25);
+        }
 
-        /* The "Blue Buttons" Navigation Grid */
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            align-items: center;
+        }
+        .typing-dot {
+            width: 7px; height: 7px;
+            background: var(--grey-mid);
+            border-radius: 50%;
+            animation: typingBounce 1.2s ease-in-out infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+
+        /* ── Quick Action Buttons ── */
+        .shortcuts-section {
+            padding: 10px 14px 8px;
+            background: var(--white);
+            border-top: 1px solid var(--grey-light);
+            flex-shrink: 0;
+        }
+        .shortcuts-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 7px;
+        }
         .shortcuts-grid {
-            padding: 10px;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            background: #f9f9f9;
-            border-top: 1px solid #eee;
+            gap: 6px;
         }
         .shortcut-btn {
-            background: var(--white);
-            border: 1px solid var(--zdvo-blue);
-            color: var(--zdvo-blue);
-            padding: 8px;
-            border-radius: 8px;
+            background: var(--off-white);
+            border: 1.5px solid var(--grey-light);
+            color: var(--navy);
+            padding: 8px 10px;
+            border-radius: var(--radius-sm);
             font-size: 12px;
             font-weight: 600;
+            font-family: 'Heebo', sans-serif;
             cursor: pointer;
-            text-align: center;
-            transition: all 0.2s;
+            text-align: right;
+            transition: all 0.18s cubic-bezier(.34,1.36,.64,1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            overflow: hidden;
         }
-        .shortcut-btn:hover { background: var(--zdvo-blue); color: var(--white); }
+        .shortcut-btn:hover {
+            background: var(--navy);
+            border-color: var(--navy);
+            color: var(--white);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,45,98,0.2);
+        }
+        .shortcut-btn .btn-icon { font-size: 14px; flex-shrink: 0; }
 
-        /* Input Area */
-        .input-area { padding: 15px; border-top: 1px solid #eee; display: flex; gap: 10px; }
-        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
-        #send-btn { background: var(--zdvo-blue); border: none; padding: 5px 15px; border-radius: 20px; color: white; cursor: pointer; }
+        /* ── Input Area ── */
+        .input-area {
+            padding: 12px 14px;
+            background: var(--white);
+            border-top: 1px solid var(--grey-light);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        #user-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1.5px solid var(--grey-light);
+            border-radius: 22px;
+            outline: none;
+            font-family: 'Heebo', sans-serif;
+            font-size: 13.5px;
+            color: var(--text);
+            background: var(--off-white);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            direction: rtl;
+        }
+        #user-input:focus {
+            border-color: var(--navy-light);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(0,79,159,0.08);
+        }
+        #user-input::placeholder { color: var(--text-muted); }
+
+        #send-btn {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--navy-light), var(--navy));
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform 0.2s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s;
+            box-shadow: 0 3px 10px rgba(0,45,98,0.28);
+        }
+        #send-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 16px rgba(0,45,98,0.38);
+        }
+        #send-btn svg { width: 18px; height: 18px; fill: white; }
+
+        /* ── Error toast ── */
+        .error-msg {
+            background: #fff3f0;
+            border: 1px solid #fdd;
+            color: #c0392b;
+        }
+
+        /* ── Footer credit ── */
+        .chat-footer-credit {
+            text-align: center;
+            padding: 6px;
+            font-size: 10px;
+            color: var(--grey-mid);
+            background: var(--white);
+        }
+        .chat-footer-credit a { color: var(--navy-light); text-decoration: none; }
     </style>
 </head>
 <body>
 
-    <div id="chat-bubble" onclick="toggleChat()">
-        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+    <!-- Floating Bubble -->
+    <div id="chat-bubble" onclick="toggleChat()" title="פתח עוזר חכם">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.524 3.656 1.435 5.163L2 22l4.837-1.435A9.956 9.956 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.95 7.95 0 01-4.163-1.165l-.298-.178-3.083.915.915-3.083-.178-.298A7.95 7.95 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"/><path d="M8 11h8v1.5H8zm0-3h8v1.5H8zm0 6h5v1.5H8z"/></svg>
     </div>
 
+    <!-- Chat Window -->
     <div id="chat-window">
+
+        <!-- Header -->
         <div class="chat-header">
-            <span>קונסיירז' דיגיטלי ZDVO</span>
-            <div>
+            <div class="header-brand">
+                <div class="header-avatar">
+                    <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 100 10A5 5 0 0012 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
+                </div>
+                <div>
+                    <div class="header-title">עוזר הנכים החכם | INZ</div>
+                    <div class="header-subtitle">
+                        <span class="status-dot"></span>
+                        פעיל ומוכן לעזור
+                    </div>
+                </div>
+            </div>
+            <div class="header-controls">
                 <select id="lang-selector" onchange="changeLang()">
-                    <option value="he">HE</option>
-                    <option value="en">EN</option>
-                    <option value="ru">RU</option>
-                    <option value="ar">AR</option>
+                    <option value="he">🇮🇱 HE</option>
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="ru">🇷🇺 RU</option>
+                    <option value="ar">🇸🇦 AR</option>
                 </select>
-                <button onclick="toggleChat()" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">×</button>
+                <button class="close-btn" onclick="toggleChat()">×</button>
             </div>
         </div>
 
+        <!-- Welcome Banner -->
+        <div class="welcome-banner">
+            <div class="welcome-icon">🛡️</div>
+            <div class="welcome-text">
+                <strong>ברוכים הבאים לארגון נכי צה"ל</strong><br>
+                אני כאן כדי לעזור לך למצוא מידע על זכויות, הלוואות, מלגות ועוד.
+            </div>
+        </div>
+
+        <!-- Messages -->
         <div id="messages-container">
-            <div class="msg bot-msg">שלום, אני כאן כדי לעזור לך לנווט באתר ארגון נכי צה"ל. מה תרצה למצוא היום?</div>
+            <div class="msg-wrapper">
+                <div class="msg-avatar-small">
+                    <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 100 10A5 5 0 0012 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
+                </div>
+                <div class="msg bot-msg">שלום! אני העוזר החכם של ארגון נכי צה"ל. מה תרצה לדעת היום? 👋</div>
+            </div>
         </div>
 
-        <div class="shortcuts-grid">
-            <button class="shortcut-btn" onclick="ask('ספר לי על הלוואות')">💰 הלוואות</button>
-            <button class="shortcut-btn" onclick="ask('מידע על מלגות לימודים')">🎓 מלגות</button>
-            <button class="shortcut-btn" onclick="ask('איפה בית הלוחם הקרוב אלי?')">🏠 בתי הלוחם</button>
-            <button class="shortcut-btn" onclick="ask('מהן הזכויות שלי?')">📑 זכויות והטבות</button>
-            <button class="shortcut-btn" onclick="ask('מידע על ביטוחים')">🏥 ביטוחים</button>
-            <button class="shortcut-btn" onclick="ask('מידע לפצועי חרבות ברזל')">🛡️ חרבות ברזל</button>
+        <!-- Quick Actions -->
+        <div class="shortcuts-section">
+            <div class="shortcuts-label">נושאים פופולריים</div>
+            <div class="shortcuts-grid">
+                <button class="shortcut-btn" onclick="ask('ספר לי על הלוואות')"><span class="btn-icon">💰</span> הלוואות</button>
+                <button class="shortcut-btn" onclick="ask('מידע על מלגות לימודים')"><span class="btn-icon">🎓</span> מלגות</button>
+                <button class="shortcut-btn" onclick="ask('איפה בית הלוחם הקרוב אלי?')"><span class="btn-icon">🏠</span> בתי הלוחם</button>
+                <button class="shortcut-btn" onclick="ask('מהן הזכויות שלי?')"><span class="btn-icon">📑</span> זכויות</button>
+                <button class="shortcut-btn" onclick="ask('מידע על ביטוחים')"><span class="btn-icon">🏥</span> ביטוחים</button>
+                <button class="shortcut-btn" onclick="ask('מידע לפצועי חרבות ברזל')"><span class="btn-icon">🛡️</span> חרבות ברזל</button>
+            </div>
         </div>
 
+        <!-- Input -->
         <div class="input-area">
-            <input type="text" id="user-input" placeholder="שאל אותי משהו..." onkeypress="handleKey(event)">
-            <button id="send-btn" onclick="sendMessage()">שלח</button>
+            <input type="text" id="user-input" placeholder="שאל אותי משהו..." onkeypress="handleKey(event)" autocomplete="off">
+            <button id="send-btn" onclick="sendMessage()" title="שלח">
+                <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+            </button>
         </div>
+
+        <div class="chat-footer-credit">מופעל על ידי <a href="https://www.inz.org.il" target="_blank">ארגון נכי צה"ל</a> · AI Assistant</div>
     </div>
 
     <script>
-        let chatHistory = [{ role: "assistant", content: "שלום, אני כאן כדי לעזור לך לנווט באתר ארגון נכי צה\"ל. מה תרצה למצוא היום?" }];
+        let chatHistory = [
+            { role: "assistant", content: 'שלום! אני העוזר החכם של ארגון נכי צה"ל. מה תרצה לדעת היום? 👋' }
+        ];
 
         function toggleChat() {
             const win = document.getElementById('chat-window');
-            win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
+            const bubble = document.getElementById('chat-bubble');
+            const isOpen = win.style.display === 'flex';
+            win.style.display = isOpen ? 'none' : 'flex';
+            bubble.classList.toggle('open', !isOpen);
+            if (!isOpen) {
+                win.style.animation = 'none';
+                win.offsetHeight;
+                win.style.animation = 'slideUp 0.3s cubic-bezier(.34,1.36,.64,1)';
+                setTimeout(() => document.getElementById('user-input').focus(), 320);
+            }
         }
 
         function handleKey(e) { if (e.key === 'Enter') sendMessage(); }
@@ -170,6 +517,53 @@
         function ask(text) {
             document.getElementById('user-input').value = text;
             sendMessage();
+        }
+
+        function addMessage(text, type) {
+            const container = document.getElementById('messages-container');
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'msg-wrapper' + (type === 'user-msg' ? ' user-wrapper' : '');
+
+            if (type === 'bot-msg' || type === 'error-msg') {
+                const avatar = document.createElement('div');
+                avatar.className = 'msg-avatar-small';
+                avatar.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 100 10A5 5 0 0012 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>`;
+                wrapper.appendChild(avatar);
+            }
+
+            const div = document.createElement('div');
+            div.className = 'msg ' + type;
+            div.innerText = text;
+            wrapper.appendChild(div);
+
+            container.appendChild(wrapper);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function showTyping() {
+            const container = document.getElementById('messages-container');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'msg-wrapper';
+            wrapper.id = 'typing-wrapper';
+
+            const avatar = document.createElement('div');
+            avatar.className = 'msg-avatar-small';
+            avatar.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 100 10A5 5 0 0012 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>`;
+
+            const typing = document.createElement('div');
+            typing.className = 'msg bot-msg typing-indicator';
+            typing.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+
+            wrapper.appendChild(avatar);
+            wrapper.appendChild(typing);
+            container.appendChild(wrapper);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function hideTyping() {
+            const el = document.getElementById('typing-wrapper');
+            if (el) el.remove();
         }
 
         async function sendMessage() {
@@ -181,6 +575,9 @@
             input.value = '';
             chatHistory.push({ role: "user", content: text });
 
+            showTyping();
+            document.getElementById('send-btn').disabled = true;
+
             try {
                 const response = await fetch('/api/chat', {
                     method: 'POST',
@@ -188,25 +585,31 @@
                     body: JSON.stringify({ messages: chatHistory })
                 });
                 const data = await response.json();
+                hideTyping();
                 addMessage(data.reply, 'bot-msg');
                 chatHistory.push({ role: "assistant", content: data.reply });
             } catch (err) {
-                addMessage("חלה שגיאה בחיבור לשרת.", 'bot-msg');
+                hideTyping();
+                addMessage("אירעה שגיאה בחיבור. אנא נסה שוב.", 'error-msg');
+            } finally {
+                document.getElementById('send-btn').disabled = false;
             }
-        }
-
-        function addMessage(text, className) {
-            const container = document.getElementById('messages-container');
-            const div = document.createElement('div');
-            div.className = `msg ${className}`;
-            div.innerText = text;
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
         }
 
         function changeLang() {
             const lang = document.getElementById('lang-selector').value;
-            // Future logic to reset greeting or notify system prompt
+            const greetings = {
+                he: 'שלום! אני כאן לעזור לך. מה תרצה לדעת? 👋',
+                en: 'Hello! I\'m here to help. What would you like to know? 👋',
+                ru: 'Здравствуйте! Я здесь, чтобы помочь вам. 👋',
+                ar: 'مرحباً! أنا هنا للمساعدة. ماذا تريد أن تعرف؟ 👋'
+            };
+            const container = document.getElementById('messages-container');
+            container.innerHTML = '';
+            chatHistory = [];
+            const greeting = greetings[lang] || greetings['he'];
+            addMessage(greeting, 'bot-msg');
+            chatHistory.push({ role: "assistant", content: greeting });
         }
     </script>
 </body>
