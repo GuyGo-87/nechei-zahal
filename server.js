@@ -56,8 +56,11 @@ app.post("/api/chat", async (req, res) => {
             parts: [{ text: m.content }]
         }));
 
+        // ── Log the key presence (never log the actual key) ──
+        console.log("GEMINI_API_KEY loaded:", !!GEMINI_API_KEY);
+
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -71,9 +74,12 @@ app.post("/api/chat", async (req, res) => {
 
         const data = await response.json();
 
+        // ── Log full Gemini response for debugging ──
+        console.log("Gemini response:", JSON.stringify(data));
+
         if (data.error) {
             console.error("Gemini Error:", data.error);
-            return res.status(500).json({ reply: "שגיאה בשרת ה-AI." });
+            return res.status(500).json({ reply: `שגיאה: ${data.error.message}` });
         }
 
         // Fixed array access
