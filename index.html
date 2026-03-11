@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html id="html-root" lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,6 @@
     <style>
         :root {
             --navy: #002d62;
-            --navy-mid: #003d7a;
             --navy-light: #004f9f;
             --orange: #e8601c;
             --white: #ffffff;
@@ -18,36 +17,39 @@
             --text: #1a2332;
             --text-muted: #5a6478;
             --shadow-sm: 0 2px 8px rgba(0,45,98,0.08);
-            --shadow-lg: 0 20px 60px rgba(0,45,98,0.20);
-            --radius: 16px;
+            --shadow-lg: 0 20px 60px rgba(0,45,98,0.22);
+            --radius: 18px;
             --radius-sm: 10px;
         }
 
-        /* Accessibility modes */
-        body.large-text .msg,
-        body.large-text .shortcut-btn,
-        body.large-text #user-input,
-        body.large-text .welcome-text { font-size: 1.15rem !important; }
+        /* ── Accessibility ── */
+        /* Large text: only bumps chat bubble content, never breaks layout */
+        body.large-text #chat-window .msg { font-size: 15px !important; line-height: 1.7 !important; }
+        body.large-text #chat-window #user-input { font-size: 15px !important; }
+        /* Everything else stays fixed so it cannot overflow */
+        body.large-text #chat-window .shortcut-btn,
+        body.large-text #chat-window .access-opt,
+        body.large-text #chat-window .shortcuts-label,
+        body.large-text #chat-window .header-title,
+        body.large-text #chat-window .header-subtitle,
+        body.large-text #chat-window .chat-footer-credit { font-size: inherit !important; }
 
-        body.high-contrast { --navy: #000080; --navy-light: #0000cc; --off-white: #ffffff; --text: #000000; --text-muted: #333333; }
-        body.high-contrast .bot-msg { background: #fff; border: 2px solid #000; color: #000; }
-        body.high-contrast .user-msg { background: #000080; color: #fff; }
+        body.high-contrast { --navy: #000080; --navy-light: #0000cc; --off-white: #fff; --text: #000; --text-muted: #222; --grey-light: #ccc; }
+        body.high-contrast .bot-msg { background: #fff; border: 2px solid #000 !important; color: #000; }
+        body.high-contrast .user-msg { background: #000080 !important; color: #fff; }
+        body.high-contrast .shortcut-btn { border: 2px solid #000 !important; }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Heebo', sans-serif; background: var(--off-white); color: var(--text); direction: rtl; }
+        body { font-family: 'Heebo', sans-serif; background: var(--off-white); color: var(--text); }
 
-        /* Floating Bubble */
+        /* ── Floating Bubble ── */
         #chat-bubble {
             position: fixed;
-            bottom: 28px;
-            right: 28px;
-            width: 74px;
-            height: 74px;
+            bottom: 28px; right: 28px;
+            width: 74px; height: 74px;
             background: linear-gradient(135deg, var(--navy-light), var(--navy));
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             cursor: pointer;
             box-shadow: 0 4px 20px rgba(0,45,98,0.35), 0 0 0 0 rgba(0,79,159,0.4);
             z-index: 1000;
@@ -57,35 +59,31 @@
         #chat-bubble:hover { transform: scale(1.08); }
         @keyframes pulse-ring {
             0%   { box-shadow: 0 4px 20px rgba(0,45,98,0.35), 0 0 0 0 rgba(0,79,159,0.4); }
-            60%  { box-shadow: 0 4px 20px rgba(0,45,98,0.35), 0 0 0 16px rgba(0,79,159,0); }
+            60%  { box-shadow: 0 4px 20px rgba(0,45,98,0.35), 0 0 0 18px rgba(0,79,159,0); }
             100% { box-shadow: 0 4px 20px rgba(0,45,98,0.35), 0 0 0 0 rgba(0,79,159,0); }
         }
         #chat-bubble svg { width: 34px; height: 34px; fill: var(--white); }
         #chat-bubble::after {
             content: '';
-            position: absolute;
-            top: 5px; left: 5px;
+            position: absolute; top: 5px; left: 5px;
             width: 14px; height: 14px;
-            background: var(--orange);
-            border-radius: 50%;
+            background: var(--orange); border-radius: 50%;
             border: 2px solid var(--white);
         }
         #chat-bubble.open::after { display: none; }
 
-        /* Chat Window */
+        /* ── Chat Window ── */
         #chat-window {
             position: fixed;
-            bottom: 116px;
-            right: 28px;
-            width: 400px;
+            bottom: 110px; right: 28px;
+            width: 420px;
             max-width: calc(100vw - 40px);
-            height: 630px;
-            max-height: calc(100vh - 150px);
+            /* Tall by default, capped so it never clips off screen */
+            height: min(780px, calc(100vh - 130px));
             background: var(--white);
             border-radius: var(--radius);
             box-shadow: var(--shadow-lg);
-            display: none;
-            flex-direction: column;
+            display: none; flex-direction: column;
             z-index: 999;
             overflow: hidden;
             border: 1px solid rgba(0,45,98,0.08);
@@ -97,133 +95,99 @@
             to   { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        /* Header */
+        /* ── Header ── */
         .chat-header {
             background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
-            padding: 14px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-            position: relative;
-            overflow: hidden;
+            padding: 11px 14px;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-shrink: 0; position: relative; overflow: hidden;
         }
         .chat-header::before {
             content: '';
-            position: absolute;
-            top: -30px; left: -30px;
+            position: absolute; top: -30px; left: -30px;
             width: 120px; height: 120px;
-            background: rgba(255,255,255,0.04);
-            border-radius: 50%;
+            background: rgba(255,255,255,0.04); border-radius: 50%;
         }
         .header-brand { display: flex; align-items: center; gap: 10px; position: relative; z-index: 1; }
         .header-avatar {
             width: 38px; height: 38px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 50%;
+            background: rgba(255,255,255,0.15); border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            border: 1.5px solid rgba(255,255,255,0.25);
-            flex-shrink: 0;
+            border: 1.5px solid rgba(255,255,255,0.25); flex-shrink: 0;
         }
         .header-avatar svg { width: 20px; height: 20px; fill: white; }
-        .header-title { color: var(--white); font-size: 14.5px; font-weight: 700; }
+        .header-title { color: var(--white); font-size: 15px; font-weight: 700; }
         .header-subtitle {
-            color: rgba(255,255,255,0.65);
-            font-size: 11px;
-            display: flex; align-items: center; gap: 5px;
-            margin-top: 2px;
+            color: rgba(255,255,255,0.65); font-size: 11px;
+            display: flex; align-items: center; gap: 5px; margin-top: 2px;
         }
         .status-dot {
-            width: 6px; height: 6px;
-            background: #4ade80;
-            border-radius: 50%;
-            box-shadow: 0 0 0 2px rgba(74,222,128,0.3);
-            display: inline-block;
+            width: 6px; height: 6px; background: #4ade80; border-radius: 50%;
+            box-shadow: 0 0 0 2px rgba(74,222,128,0.3); display: inline-block;
+            animation: blink 2s ease-in-out infinite;
         }
-        .header-controls { display: flex; align-items: center; gap: 6px; position: relative; z-index: 1; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
+        .header-controls { display: flex; align-items: center; gap: 6px; position: relative; z-index: 1; }
         #lang-selector {
-            background: var(--white);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: var(--navy);
-            padding: 4px 7px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-family: 'Heebo', sans-serif;
-            font-weight: 700;
-            cursor: pointer;
+            background: var(--white); border: 1px solid rgba(255,255,255,0.3);
+            color: var(--navy); padding: 4px 7px; border-radius: 8px;
+            font-size: 11px; font-family: 'Heebo', sans-serif; font-weight: 700; cursor: pointer;
         }
         #lang-selector option { background: var(--white); color: var(--navy); }
 
-        .icon-btn {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.25);
-            color: white;
-            width: 30px; height: 30px;
-            border-radius: 8px;
-            font-size: 15px;
-            cursor: pointer;
+        /* Accessibility button — bright orange so it's unmissable */
+        .access-toggle-btn {
+            background: var(--orange);
+            border: 2px solid rgba(255,255,255,0.4);
+            color: white; width: 32px; height: 32px;
+            border-radius: 8px; font-size: 16px; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            transition: background 0.2s;
-            flex-shrink: 0;
+            transition: background 0.2s, transform 0.15s;
+            flex-shrink: 0; font-weight: 700;
+        }
+        .access-toggle-btn:hover { background: #c04e0e; transform: scale(1.08); }
+        .access-toggle-btn.active { background: #fff; color: var(--orange); }
+
+        .icon-btn {
+            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+            color: white; width: 30px; height: 30px; border-radius: 8px;
+            font-size: 18px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s; flex-shrink: 0; line-height: 1;
         }
         .icon-btn:hover { background: rgba(255,255,255,0.28); }
 
-        /* Accessibility Panel */
+        /* ── Accessibility Panel — compact single row ── */
         #access-panel {
-            background: #f0f4ff;
-            border-bottom: 1px solid #dce6f7;
-            padding: 10px 14px;
-            display: none;
-            flex-wrap: wrap;
-            gap: 7px;
-            align-items: center;
-            flex-shrink: 0;
+            background: #fff8f0;
+            border-bottom: 2px solid #f0d5b8;
+            padding: 7px 13px 8px;
+            display: none; flex-wrap: nowrap; gap: 6px; align-items: center;
+            flex-shrink: 0; overflow-x: auto; scrollbar-width: none;
         }
+        #access-panel::-webkit-scrollbar { display: none; }
         #access-panel.visible { display: flex; }
-        .access-label {
-            font-size: 10.5px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.5px;
-            color: var(--navy); width: 100%; margin-bottom: 1px;
-        }
+        .access-label { display: none; }
         .access-opt {
-            background: var(--white);
-            border: 1.5px solid #c5d5ee;
-            color: var(--navy);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px; font-weight: 600;
-            font-family: 'Heebo', sans-serif;
-            cursor: pointer;
-            transition: all 0.18s;
-            display: flex; align-items: center; gap: 5px;
+            background: var(--white); border: 1.5px solid #e0c0a0;
+            color: var(--navy); padding: 5px 11px; border-radius: 20px;
+            font-size: 11.5px; font-weight: 600; font-family: 'Heebo', sans-serif;
+            cursor: pointer; transition: all 0.18s; white-space: nowrap; flex-shrink: 0;
+            display: flex; align-items: center; gap: 4px;
         }
         .access-opt:hover, .access-opt.active {
-            background: var(--navy);
-            border-color: var(--navy);
-            color: var(--white);
+            background: var(--navy); border-color: var(--navy); color: var(--white);
         }
 
-        /* Welcome Banner */
-        .welcome-banner {
-            background: linear-gradient(135deg, #eef4ff 0%, #f5f0ff 100%);
-            border-bottom: 1px solid var(--grey-light);
-            padding: 11px 16px;
-            display: flex; align-items: center; gap: 10px;
-            flex-shrink: 0;
-        }
-        .welcome-icon { font-size: 20px; }
-        .welcome-text { font-size: 12px; color: var(--text-muted); font-weight: 500; line-height: 1.45; }
-        .welcome-text strong { color: var(--navy); font-weight: 700; }
+        /* Welcome Banner — hidden, space freed for messages */
+        .welcome-banner { display: none !important; }
 
-        /* Messages */
+        /* ── Messages ── */
         #messages-container {
-            flex: 1;
-            padding: 14px 12px;
-            overflow-y: auto;
-            display: flex; flex-direction: column; gap: 10px;
-            background: #fafbfd;
-            scroll-behavior: smooth;
+            flex: 1; padding: 14px 12px;
+            overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
+            background: #fafbfd; scroll-behavior: smooth;
         }
         #messages-container::-webkit-scrollbar { width: 4px; }
         #messages-container::-webkit-scrollbar-thumb { background: var(--grey-mid); border-radius: 4px; }
@@ -231,20 +195,14 @@
         .msg-wrapper { display: flex; gap: 8px; align-items: flex-end; }
         .msg-wrapper.user-wrapper { flex-direction: row-reverse; }
         .msg-avatar-small {
-            width: 28px; height: 28px;
-            border-radius: 50%;
+            width: 28px; height: 28px; border-radius: 50%;
             background: linear-gradient(135deg, var(--navy-light), var(--navy));
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
         .msg-avatar-small svg { width: 14px; height: 14px; fill: white; }
-
         .msg {
-            max-width: 78%;
-            padding: 10px 14px;
-            border-radius: 16px;
-            font-size: 13.5px;
-            line-height: 1.55;
+            max-width: 78%; padding: 10px 14px; border-radius: 16px;
+            font-size: 13.5px; line-height: 1.55;
             animation: msgIn 0.25s cubic-bezier(.34,1.36,.64,1);
         }
         @keyframes msgIn {
@@ -254,13 +212,11 @@
         .bot-msg {
             background: var(--white); color: var(--text);
             border-bottom-right-radius: 4px;
-            box-shadow: var(--shadow-sm);
-            border: 1px solid rgba(0,45,98,0.06);
+            box-shadow: var(--shadow-sm); border: 1px solid rgba(0,45,98,0.06);
         }
         .user-msg {
             background: linear-gradient(135deg, var(--navy-light), var(--navy));
-            color: var(--white);
-            border-bottom-left-radius: 4px;
+            color: var(--white); border-bottom-left-radius: 4px;
             box-shadow: 0 4px 14px rgba(0,45,98,0.25);
         }
         .error-msg { background: #fff3f0; border: 1px solid #fdd; color: #c0392b; }
@@ -268,99 +224,99 @@
         /* Typing */
         .typing-indicator { display: flex; gap: 4px; padding: 12px 16px; align-items: center; }
         .typing-dot {
-            width: 7px; height: 7px;
-            background: var(--grey-mid); border-radius: 50%;
+            width: 7px; height: 7px; background: var(--grey-mid); border-radius: 50%;
             animation: typingBounce 1.2s ease-in-out infinite;
         }
         .typing-dot:nth-child(2) { animation-delay: 0.15s; }
         .typing-dot:nth-child(3) { animation-delay: 0.3s; }
         @keyframes typingBounce {
-            0%, 60%, 100% { transform: translateY(0); }
+            0%,60%,100% { transform: translateY(0); }
             30% { transform: translateY(-5px); }
         }
 
-        /* Quick Actions */
+        /* ── Quick Actions — fixed-height single scrollable row ── */
         .shortcuts-section {
-            padding: 10px 13px 8px;
-            background: var(--white);
+            padding: 7px 12px 9px; background: var(--white);
             border-top: 1px solid var(--grey-light);
-            flex-shrink: 0;
+            flex-shrink: 0; flex-grow: 0;
+            /* Hard cap — never steals space from messages */
+            height: 54px; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: center;
         }
         .shortcuts-label {
-            font-size: 10px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.8px;
-            color: var(--text-muted); margin-bottom: 7px;
+            font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.7px; color: var(--text-muted);
+            margin-bottom: 5px; flex-shrink: 0;
         }
-        .shortcuts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .shortcuts-grid {
+            display: flex; flex-direction: row; gap: 6px;
+            overflow-x: auto; overflow-y: hidden;
+            scrollbar-width: none; flex: 1;
+            align-items: center;
+        }
+        .shortcuts-grid::-webkit-scrollbar { display: none; }
         .shortcut-btn {
-            background: var(--off-white);
-            border: 1.5px solid var(--grey-light);
-            color: var(--navy);
-            padding: 8px 10px;
-            border-radius: var(--radius-sm);
-            font-size: 12px; font-weight: 600;
-            font-family: 'Heebo', sans-serif;
-            cursor: pointer; text-align: right;
+            background: var(--off-white); border: 1.5px solid var(--grey-light);
+            color: var(--navy); padding: 5px 11px; border-radius: 20px;
+            font-size: 12px; font-weight: 600; font-family: 'Heebo', sans-serif;
+            cursor: pointer; white-space: nowrap; flex-shrink: 0; height: 28px;
             transition: all 0.18s cubic-bezier(.34,1.36,.64,1);
-            display: flex; align-items: center; gap: 6px;
+            display: flex; align-items: center; gap: 5px;
         }
         .shortcut-btn:hover {
             background: var(--navy); border-color: var(--navy); color: var(--white);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0,45,98,0.2);
+            transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,45,98,0.2);
         }
-        .btn-icon { font-size: 14px; flex-shrink: 0; }
+        .btn-icon { font-size: 13px; flex-shrink: 0; }
 
-        /* Input */
+        /* ── Input ── */
         .input-area {
-            padding: 11px 13px;
-            background: var(--white);
+            padding: 9px 12px; background: var(--white);
             border-top: 1px solid var(--grey-light);
             display: flex; gap: 8px; align-items: center;
-            flex-shrink: 0;
+            flex-shrink: 0; flex-grow: 0;
         }
         #user-input {
             flex: 1; padding: 10px 14px;
-            border: 1.5px solid var(--grey-light);
-            border-radius: 22px; outline: none;
-            font-family: 'Heebo', sans-serif;
-            font-size: 13.5px; color: var(--text);
-            background: var(--off-white);
-            transition: border-color 0.2s, box-shadow 0.2s;
-            direction: rtl;
+            border: 1.5px solid var(--grey-light); border-radius: 22px; outline: none;
+            font-family: 'Heebo', sans-serif; font-size: 13.5px; color: var(--text);
+            background: var(--off-white); transition: border-color 0.2s, box-shadow 0.2s;
         }
         #user-input:focus {
-            border-color: var(--navy-light);
-            background: var(--white);
+            border-color: var(--navy-light); background: var(--white);
             box-shadow: 0 0 0 3px rgba(0,79,159,0.08);
         }
         #user-input::placeholder { color: var(--text-muted); }
-
         #send-btn {
             width: 40px; height: 40px;
             background: linear-gradient(135deg, var(--navy-light), var(--navy));
             border: none; border-radius: 50%; color: white; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
             transition: transform 0.2s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s;
             box-shadow: 0 3px 10px rgba(0,45,98,0.28);
         }
         #send-btn:hover { transform: scale(1.1); box-shadow: 0 5px 16px rgba(0,45,98,0.38); }
+        #send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         #send-btn svg { width: 18px; height: 18px; fill: white; }
 
         .chat-footer-credit {
-            text-align: center; padding: 5px;
-            font-size: 10px; color: var(--grey-mid);
-            background: var(--white);
+            text-align: center; padding: 3px; font-size: 10px;
+            color: var(--grey-mid); background: var(--white);
+            flex-shrink: 0;
         }
         .chat-footer-credit a { color: var(--navy-light); text-decoration: none; }
+
+        @media (max-width: 480px) {
+            #chat-window { right: 12px; width: calc(100vw - 24px); }
+            #chat-bubble { right: 18px; }
+        }
     </style>
 </head>
 <body>
 
     <!-- Floating Bubble -->
     <div id="chat-bubble" onclick="toggleChat()" role="button" aria-label="פתח עוזר צ'אט">
-        <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.524 3.656 1.435 5.163L2 22l4.837-1.435A9.956 9.956 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.95 7.95 0 01-4.163-1.165l-.298-.178-3.083.915.915-3.083-.178-.298A7.95 7.95 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"/><path d="M8 11h8v1.5H8zm0-3h8v1.5H8zm0 6h5v1.5H8z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.524 3.656 1.435 5.163L2 22l4.837-1.435A9.956 9.956 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
     </div>
 
     <!-- Chat Window -->
@@ -373,10 +329,10 @@
                     <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 100 10A5 5 0 0012 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
                 </div>
                 <div>
-                    <div class="header-title">ארגון נכי צה"ל</div>
+                    <div class="header-title" id="header-title">ארגון נכי צה"ל</div>
                     <div class="header-subtitle">
                         <span class="status-dot"></span>
-                        פעיל ומוכן לעזור
+                        <span id="header-subtitle">פעיל ומוכן לעזור</span>
                     </div>
                 </div>
             </div>
@@ -389,226 +345,414 @@
                     <option value="ar">العربية</option>
                     <option value="am">አማርኛ</option>
                 </select>
-                <button class="icon-btn" onclick="toggleAccessPanel()" title="נגישות" aria-label="אפשרויות נגישות">&#9855;</button>
+                <!-- Accessibility button — orange and clearly visible -->
+                <button class="access-toggle-btn" id="access-toggle" onclick="toggleAccessPanel()" title="נגישות" aria-label="אפשרויות נגישות" aria-expanded="false">
+                    &#9855;
+                </button>
                 <button class="icon-btn" onclick="toggleChat()" aria-label="סגור">&#215;</button>
             </div>
         </div>
 
         <!-- Accessibility Panel -->
         <div id="access-panel" role="region" aria-label="אפשרויות נגישות">
-            <div class="access-label">&#9855; נגישות</div>
-            <button class="access-opt" id="btn-large" onclick="toggleLargeText()" aria-pressed="false">&#128210; טקסט גדול</button>
-            <button class="access-opt" id="btn-contrast" onclick="toggleHighContrast()" aria-pressed="false">&#9680; ניגודיות גבוהה</button>
-            <button class="access-opt" id="btn-voice" onclick="toggleVoice()" aria-pressed="false">&#128266; קריאה קולית</button>
-            <button class="access-opt" onclick="resetAccess()">&#8635; איפוס</button>
+            <div class="access-label" id="access-title">&#9855; נגישות</div>
+            <button class="access-opt" id="btn-large" onclick="toggleLargeText()" aria-pressed="false">
+                &#128210; <span id="txt-large">טקסט גדול</span>
+            </button>
+            <button class="access-opt" id="btn-contrast" onclick="toggleHighContrast()" aria-pressed="false">
+                &#9680; <span id="txt-contrast">ניגודיות גבוהה</span>
+            </button>
+            <button class="access-opt" id="btn-voice" onclick="toggleVoice()" aria-pressed="false">
+                &#128266; <span id="txt-voice">קריאה קולית</span>
+            </button>
+            <button class="access-opt" onclick="resetAccess()" id="btn-reset">
+                &#8635; <span id="txt-reset">איפוס</span>
+            </button>
         </div>
 
         <!-- Welcome Banner -->
         <div class="welcome-banner">
             <div class="welcome-icon">&#128737;</div>
-            <div class="welcome-text">
-                <strong>ברוכים הבאים לארגון נכי צה"ל</strong><br>
-                אני כאן כדי לעזור לך למצוא מידע על זכויות, הלוואות, מלגות ועוד.
+            <div class="welcome-text" id="welcome-text">
+                <strong id="welcome-strong">ברוכים הבאים לארגון נכי צה"ל</strong><br>
+                <span id="welcome-sub">אני כאן כדי לעזור לך למצוא מידע על זכויות, הלוואות, מלגות ועוד.</span>
             </div>
         </div>
 
         <!-- Messages -->
-        <div id="messages-container" role="log" aria-live="polite" aria-atomic="false">
-            <div class="msg-wrapper">
-                <div class="msg-avatar-small">
-                    <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 100 10A5 5 0 0012 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
-                </div>
-                <div class="msg bot-msg">שלום! אני העוזר החכם של ארגון נכי צה"ל. מה תרצה לדעת היום? &#128075;</div>
-            </div>
-        </div>
+        <div id="messages-container" role="log" aria-live="polite" aria-atomic="false"></div>
 
         <!-- Quick Actions -->
         <div class="shortcuts-section">
-            <div class="shortcuts-label">נושאים פופולריים</div>
-            <div class="shortcuts-grid">
-                <button class="shortcut-btn" onclick="ask('ספר לי על הלוואות')"><span class="btn-icon">&#128176;</span> הלוואות</button>
-                <button class="shortcut-btn" onclick="ask('מידע על מלגות לימודים')"><span class="btn-icon">&#127891;</span> מלגות</button>
-                <button class="shortcut-btn" onclick="ask('איפה בית הלוחם הקרוב אלי?')"><span class="btn-icon">&#127968;</span> בתי הלוחם</button>
-                <button class="shortcut-btn" onclick="ask('מהן הזכויות שלי?')"><span class="btn-icon">&#128209;</span> זכויות</button>
-                <button class="shortcut-btn" onclick="ask('מידע על ביטוחים')"><span class="btn-icon">&#127973;</span> ביטוחים</button>
-                <button class="shortcut-btn" onclick="ask('מידע לפצועי חרבות ברזל')"><span class="btn-icon">&#128737;</span> חרבות ברזל</button>
+            <div class="shortcuts-label" id="shortcuts-label">נושאים פופולריים</div>
+            <div class="shortcuts-grid" id="shortcuts-grid">
+                <!-- Populated by JS -->
             </div>
         </div>
 
         <!-- Input -->
         <div class="input-area">
-            <input type="text" id="user-input" placeholder="שאל אותי משהו..." onkeypress="handleKey(event)" autocomplete="off" aria-label="הקלד הודעה">
-            <button id="send-btn" onclick="sendMessage()" aria-label="שלח הודעה">
+            <input type="text" id="user-input" onkeypress="handleKey(event)" autocomplete="off" aria-label="הקלד הודעה">
+            <button id="send-btn" onclick="sendMessage()" aria-label="שלח">
                 <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
             </button>
         </div>
 
-        <div class="chat-footer-credit">מופעל על ידי <a href="https://www.inz.org.il" target="_blank" rel="noopener">ארגון נכי צה"ל</a> &middot; AI Assistant</div>
+        <div class="chat-footer-credit">
+            <span id="footer-text">מופעל על ידי</span>
+            <a href="https://www.inz.org.il" target="_blank" rel="noopener">ארגון נכי צה"ל</a>
+            &middot; AI Assistant
+        </div>
     </div>
 
     <script>
-        let chatHistory = [
-            { role: "assistant", content: 'שלום! אני העוזר החכם של ארגון נכי צה"ל. מה תרצה לדעת היום? 👋' }
-        ];
-        let voiceEnabled = false;
+    // ── Language Definitions ──
+    const LANGS = {
+        he: {
+            dir: 'rtl', lang: 'he',
+            greeting: 'שלום! אני העוזר החכם של ארגון נכי צה"ל. מה תרצה לדעת היום? &#128075;',
+            headerTitle: 'ארגון נכי צה"ל',
+            headerSubtitle: 'פעיל ומוכן לעזור',
+            welcomeStrong: 'ברוכים הבאים לארגון נכי צה"ל',
+            welcomeSub: 'אני כאן כדי לעזור לך למצוא מידע על זכויות, הלוואות, מלגות ועוד.',
+            placeholder: 'שאל אותי משהו...',
+            shortcutsLabel: 'נושאים פופולריים',
+            accessTitle: '&#9855; נגישות',
+            txtLarge: 'טקסט גדול',
+            txtContrast: 'ניגודיות גבוהה',
+            txtVoice: 'קריאה קולית',
+            txtReset: 'איפוס',
+            footerText: 'מופעל על ידי',
+            connError: 'אירעה שגיאה בחיבור. אנא נסה שוב.',
+            shortcuts: [
+                { icon: '&#128176;', label: 'הלוואות', query: 'ספר לי על הלוואות' },
+                { icon: '&#127891;', label: 'מלגות', query: 'מידע על מלגות לימודים' },
+                { icon: '&#127968;', label: 'בתי הלוחם', query: 'איפה בית הלוחם הקרוב אלי?' },
+                { icon: '&#128209;', label: 'זכויות', query: 'מהן הזכויות שלי?' },
+                { icon: '&#127973;', label: 'ביטוחים', query: 'מידע על ביטוחים' },
+                { icon: '&#128737;', label: 'חרבות ברזל', query: 'מידע לפצועי חרבות ברזל' },
+            ]
+        },
+        en: {
+            dir: 'ltr', lang: 'en',
+            greeting: 'Hello! I\'m the smart assistant of the IDF Disabled Veterans Organization. What would you like to know today? &#128075;',
+            headerTitle: 'IDF Disabled Veterans',
+            headerSubtitle: 'Active & ready to help',
+            welcomeStrong: 'Welcome to IDF Disabled Veterans Org',
+            welcomeSub: 'I\'m here to help you find information on rights, loans, scholarships and more.',
+            placeholder: 'Ask me anything...',
+            shortcutsLabel: 'Popular Topics',
+            accessTitle: '&#9855; Accessibility',
+            txtLarge: 'Large Text',
+            txtContrast: 'High Contrast',
+            txtVoice: 'Voice Reading',
+            txtReset: 'Reset',
+            footerText: 'Powered by',
+            connError: 'Connection error. Please try again.',
+            shortcuts: [
+                { icon: '&#128176;', label: 'Loans', query: 'Tell me about loans' },
+                { icon: '&#127891;', label: 'Scholarships', query: 'Information about scholarships' },
+                { icon: '&#127968;', label: 'Beit HaLochem', query: 'Where is the nearest Beit HaLochem?' },
+                { icon: '&#128209;', label: 'Rights', query: 'What are my rights?' },
+                { icon: '&#127973;', label: 'Insurance', query: 'Information about insurance' },
+                { icon: '&#128737;', label: 'Iron Swords', query: 'Info for Iron Swords wounded' },
+            ]
+        },
+        es: {
+            dir: 'ltr', lang: 'es',
+            greeting: '¡Hola! Soy el asistente inteligente de la Organización de Veteranos Discapacitados de las FDI. ¿Qué deseas saber hoy? &#128075;',
+            headerTitle: 'Veteranos FDI Discapacitados',
+            headerSubtitle: 'Activo y listo para ayudar',
+            welcomeStrong: 'Bienvenido a la Org. de Veteranos FDI',
+            welcomeSub: 'Estoy aquí para ayudarte a encontrar información sobre derechos, préstamos, becas y más.',
+            placeholder: 'Pregúntame algo...',
+            shortcutsLabel: 'Temas Populares',
+            accessTitle: '&#9855; Accesibilidad',
+            txtLarge: 'Texto Grande',
+            txtContrast: 'Alto Contraste',
+            txtVoice: 'Lectura en Voz Alta',
+            txtReset: 'Restablecer',
+            footerText: 'Desarrollado por',
+            connError: 'Error de conexión. Por favor, inténtalo de nuevo.',
+            shortcuts: [
+                { icon: '&#128176;', label: 'Préstamos', query: 'Información sobre préstamos' },
+                { icon: '&#127891;', label: 'Becas', query: 'Información sobre becas' },
+                { icon: '&#127968;', label: 'Beit HaLochem', query: '¿Dónde está el Beit HaLochem más cercano?' },
+                { icon: '&#128209;', label: 'Derechos', query: '¿Cuáles son mis derechos?' },
+                { icon: '&#127973;', label: 'Seguros', query: 'Información sobre seguros' },
+                { icon: '&#128737;', label: 'Espadas de Hierro', query: 'Info para heridos en Espadas de Hierro' },
+            ]
+        },
+        ru: {
+            dir: 'ltr', lang: 'ru',
+            greeting: 'Здравствуйте! Я умный помощник организации инвалидов ЦАХАЛа. Что вы хотите узнать сегодня? &#128075;',
+            headerTitle: 'Инвалиды ЦАХАЛа',
+            headerSubtitle: 'Активен и готов помочь',
+            welcomeStrong: 'Добро пожаловать в организацию инвалидов ЦАХАЛа',
+            welcomeSub: 'Я здесь, чтобы помочь вам найти информацию о правах, кредитах, стипендиях и многом другом.',
+            placeholder: 'Задайте мне вопрос...',
+            shortcutsLabel: 'Популярные темы',
+            accessTitle: '&#9855; Доступность',
+            txtLarge: 'Крупный текст',
+            txtContrast: 'Высокий контраст',
+            txtVoice: 'Чтение вслух',
+            txtReset: 'Сброс',
+            footerText: 'Работает на',
+            connError: 'Ошибка соединения. Пожалуйста, попробуйте снова.',
+            shortcuts: [
+                { icon: '&#128176;', label: 'Кредиты', query: 'Расскажи о кредитах' },
+                { icon: '&#127891;', label: 'Стипендии', query: 'Информация о стипендиях' },
+                { icon: '&#127968;', label: 'Бейт-аЛохем', query: 'Где ближайший Бейт-аЛохем?' },
+                { icon: '&#128209;', label: 'Права', query: 'Каковы мои права?' },
+                { icon: '&#127973;', label: 'Страхование', query: 'Информация о страховании' },
+                { icon: '&#128737;', label: 'Мечи железа', query: 'Инфо для раненых операции Мечи железа' },
+            ]
+        },
+        ar: {
+            dir: 'rtl', lang: 'ar',
+            greeting: 'مرحباً! أنا المساعد الذكي لمنظمة معاقي الجيش الإسرائيلي. ماذا تريد أن تعرف اليوم؟ &#128075;',
+            headerTitle: 'معاقو الجيش الإسرائيلي',
+            headerSubtitle: 'نشط ومستعد للمساعدة',
+            welcomeStrong: 'مرحباً بك في منظمة معاقي الجيش الإسرائيلي',
+            welcomeSub: 'أنا هنا لمساعدتك في إيجاد معلومات حول الحقوق والقروض والمنح الدراسية والمزيد.',
+            placeholder: 'اسألني أي شيء...',
+            shortcutsLabel: 'مواضيع شائعة',
+            accessTitle: '&#9855; إمكانية الوصول',
+            txtLarge: 'نص كبير',
+            txtContrast: 'تباين عالٍ',
+            txtVoice: 'القراءة الصوتية',
+            txtReset: 'إعادة تعيين',
+            footerText: 'مدعوم من',
+            connError: 'خطأ في الاتصال. يرجى المحاولة مرة أخرى.',
+            shortcuts: [
+                { icon: '&#128176;', label: 'القروض', query: 'أخبرني عن القروض' },
+                { icon: '&#127891;', label: 'المنح', query: 'معلومات عن المنح الدراسية' },
+                { icon: '&#127968;', label: 'بيت المحارب', query: 'أين أقرب بيت محارب؟' },
+                { icon: '&#128209;', label: 'الحقوق', query: 'ما هي حقوقي؟' },
+                { icon: '&#127973;', label: 'التأمين', query: 'معلومات عن التأمين' },
+                { icon: '&#128737;', label: 'سيوف الحديد', query: 'معلومات لجرحى عملية سيوف الحديد' },
+            ]
+        },
+        am: {
+            dir: 'ltr', lang: 'am',
+            greeting: 'ሰላም! እኔ የIDF አካል ጉዳተኞች ድርጅት ብልህ ረዳት ነኝ። ዛሬ ምን ማወቅ ይፈልጋሉ? &#128075;',
+            headerTitle: 'IDF አካል ጉዳተኞች',
+            headerSubtitle: 'ለመርዳት ዝግጁ ነኝ',
+            welcomeStrong: 'እንኳን ደህና መጡ',
+            welcomeSub: 'ስለ መብቶች፣ ብድር፣ ስኮላርሺፕ እና ተጨማሪ መረጃ ለማግኘት እዚህ ነኝ።',
+            placeholder: 'ይጠይቁኝ...',
+            shortcutsLabel: 'ታዋቂ ርዕሶች',
+            accessTitle: '&#9855; ተደራሽነት',
+            txtLarge: 'ትልቅ ጽሑፍ',
+            txtContrast: 'ከፍተኛ ንፅፅር',
+            txtVoice: 'የድምፅ ንባብ',
+            txtReset: 'ዳግም አስጀምር',
+            footerText: 'በ',
+            connError: 'የግንኙነት ስህተት። እባክዎ እንደገና ይሞክሩ።',
+            shortcuts: [
+                { icon: '&#128176;', label: 'ብድር', query: 'ስለ ብድር ንገረኝ' },
+                { icon: '&#127891;', label: 'ስኮላርሺፕ', query: 'ስለ ስኮላርሺፕ መረጃ' },
+                { icon: '&#127968;', label: 'ቤት ሃሎቸም', query: 'ቅርብ ቤት ሃሎቸም የት ነው?' },
+                { icon: '&#128209;', label: 'መብቶች', query: 'መብቶቼ ምንድን ናቸው?' },
+                { icon: '&#127973;', label: 'ኢንሹራንስ', query: 'ስለ ኢንሹራንስ መረጃ' },
+                { icon: '&#128737;', label: 'የብረት ሰይፍ', query: 'ለብረት ሰይፍ ቆሰሉ መረጃ' },
+            ]
+        }
+    };
 
-        function toggleChat() {
-            const win = document.getElementById('chat-window');
-            const bubble = document.getElementById('chat-bubble');
-            const isOpen = win.style.display === 'flex';
-            win.style.display = isOpen ? 'none' : 'flex';
-            bubble.classList.toggle('open', !isOpen);
-            if (!isOpen) {
-                win.style.animation = 'none';
-                win.offsetHeight;
-                win.style.animation = 'slideUp 0.3s cubic-bezier(.34,1.36,.64,1)';
-                setTimeout(() => document.getElementById('user-input').focus(), 320);
+    let currentLang = 'he';
+    let chatHistory = [];
+    let voiceEnabled = false;
+
+    function getLang() { return LANGS[currentLang]; }
+
+    // ── Apply full UI language ──
+    function applyLang(code) {
+        currentLang = code;
+        const L = getLang();
+        const root = document.getElementById('html-root');
+        root.setAttribute('lang', L.lang);
+        root.setAttribute('dir', L.dir);
+
+        // Header
+        document.getElementById('header-title').textContent = L.headerTitle;
+        document.getElementById('header-subtitle').innerHTML = L.headerSubtitle;
+
+        // Welcome banner
+        document.getElementById('welcome-strong').textContent = L.welcomeStrong;
+        document.getElementById('welcome-sub').textContent = L.welcomeSub;
+
+        // Input placeholder
+        document.getElementById('user-input').placeholder = L.placeholder;
+
+        // Shortcuts label
+        document.getElementById('shortcuts-label').textContent = L.shortcutsLabel;
+
+        // Accessibility panel
+        document.getElementById('access-title').innerHTML = L.accessTitle;
+        document.getElementById('txt-large').textContent = L.txtLarge;
+        document.getElementById('txt-contrast').textContent = L.txtContrast;
+        document.getElementById('txt-voice').textContent = L.txtVoice;
+        document.getElementById('txt-reset').textContent = L.txtReset;
+
+        // Footer
+        document.getElementById('footer-text').textContent = L.footerText;
+
+        // Shortcuts grid
+        const grid = document.getElementById('shortcuts-grid');
+        grid.innerHTML = '';
+        L.shortcuts.forEach(s => {
+            const btn = document.createElement('button');
+            btn.className = 'shortcut-btn';
+            btn.innerHTML = `<span class="btn-icon">${s.icon}</span> ${s.label}`;
+            btn.onclick = () => ask(s.query);
+            grid.appendChild(btn);
+        });
+    }
+
+    function changeLang() {
+        const code = document.getElementById('lang-selector').value;
+        applyLang(code);
+
+        // Reset messages with greeting in new language
+        document.getElementById('messages-container').innerHTML = '';
+        chatHistory = [];
+        addMessage(getLang().greeting, 'bot-msg');
+        chatHistory.push({ role: 'assistant', content: getLang().greeting });
+    }
+
+    // ── Chat ──
+    function toggleChat() {
+        const win = document.getElementById('chat-window');
+        const bubble = document.getElementById('chat-bubble');
+        const isOpen = win.style.display === 'flex';
+        if (!isOpen) {
+            win.style.display = 'flex';
+            win.style.animation = 'none';
+            win.offsetHeight;
+            win.style.animation = 'slideUp 0.3s cubic-bezier(.34,1.36,.64,1)';
+            bubble.classList.add('open');
+            if (chatHistory.length === 0) {
+                addMessage(getLang().greeting, 'bot-msg');
+                chatHistory.push({ role: 'assistant', content: getLang().greeting });
             }
+            setTimeout(() => document.getElementById('user-input').focus(), 320);
+        } else {
+            win.style.display = 'none';
+            bubble.classList.remove('open');
         }
+    }
 
-        function toggleAccessPanel() {
-            document.getElementById('access-panel').classList.toggle('visible');
-        }
+    function handleKey(e) { if (e.key === 'Enter') sendMessage(); }
+    function ask(text) { document.getElementById('user-input').value = text; sendMessage(); }
 
-        function toggleLargeText() {
-            const btn = document.getElementById('btn-large');
-            document.body.classList.toggle('large-text');
-            const on = document.body.classList.contains('large-text');
-            btn.classList.toggle('active', on);
-            btn.setAttribute('aria-pressed', on);
-        }
+    function addMessage(html, type) {
+        const container = document.getElementById('messages-container');
+        const wrapper = document.createElement('div');
+        wrapper.className = 'msg-wrapper' + (type === 'user-msg' ? ' user-wrapper' : '');
 
-        function toggleHighContrast() {
-            const btn = document.getElementById('btn-contrast');
-            document.body.classList.toggle('high-contrast');
-            const on = document.body.classList.contains('high-contrast');
-            btn.classList.toggle('active', on);
-            btn.setAttribute('aria-pressed', on);
-        }
-
-        function toggleVoice() {
-            const btn = document.getElementById('btn-voice');
-            voiceEnabled = !voiceEnabled;
-            btn.classList.toggle('active', voiceEnabled);
-            btn.setAttribute('aria-pressed', voiceEnabled);
-            if (voiceEnabled) speak('קריאה קולית מופעלת');
-            else window.speechSynthesis && window.speechSynthesis.cancel();
-        }
-
-        function resetAccess() {
-            document.body.classList.remove('large-text', 'high-contrast');
-            voiceEnabled = false;
-            ['btn-large', 'btn-contrast', 'btn-voice'].forEach(id => {
-                document.getElementById(id).classList.remove('active');
-                document.getElementById(id).setAttribute('aria-pressed', 'false');
-            });
-        }
-
-        function speak(text) {
-            if (!voiceEnabled || !window.speechSynthesis) return;
-            const utt = new SpeechSynthesisUtterance(text);
-            const lang = document.getElementById('lang-selector').value;
-            const langMap = { he: 'he-IL', en: 'en-US', es: 'es-ES', ru: 'ru-RU', ar: 'ar-SA', am: 'am-ET' };
-            utt.lang = langMap[lang] || 'he-IL';
-            window.speechSynthesis.cancel();
-            window.speechSynthesis.speak(utt);
-        }
-
-        function handleKey(e) { if (e.key === 'Enter') sendMessage(); }
-        function ask(text) {
-            document.getElementById('user-input').value = text;
-            sendMessage();
-        }
-
-        function addMessage(text, type) {
-            const container = document.getElementById('messages-container');
-            const wrapper = document.createElement('div');
-            wrapper.className = 'msg-wrapper' + (type === 'user-msg' ? ' user-wrapper' : '');
-
-            if (type !== 'user-msg') {
-                const avatar = document.createElement('div');
-                avatar.className = 'msg-avatar-small';
-                avatar.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 100 10A5 5 0 0012 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>';
-                wrapper.appendChild(avatar);
-            }
-
-            const div = document.createElement('div');
-            div.className = 'msg ' + type;
-            div.innerText = text;
-            wrapper.appendChild(div);
-            container.appendChild(wrapper);
-            container.scrollTop = container.scrollHeight;
-
-            if (type === 'bot-msg') speak(text);
-        }
-
-        function showTyping() {
-            const container = document.getElementById('messages-container');
-            const wrapper = document.createElement('div');
-            wrapper.className = 'msg-wrapper';
-            wrapper.id = 'typing-wrapper';
+        if (type !== 'user-msg') {
             const avatar = document.createElement('div');
             avatar.className = 'msg-avatar-small';
             avatar.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 100 10A5 5 0 0012 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>';
-            const typing = document.createElement('div');
-            typing.className = 'msg bot-msg typing-indicator';
-            typing.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
             wrapper.appendChild(avatar);
-            wrapper.appendChild(typing);
-            container.appendChild(wrapper);
-            container.scrollTop = container.scrollHeight;
         }
+        const div = document.createElement('div');
+        div.className = 'msg ' + type;
+        div.innerHTML = html;
+        wrapper.appendChild(div);
+        container.appendChild(wrapper);
+        container.scrollTop = container.scrollHeight;
 
-        function hideTyping() {
-            const el = document.getElementById('typing-wrapper');
-            if (el) el.remove();
+        if (type === 'bot-msg') speak(div.textContent);
+    }
+
+    function showTyping() {
+        const c = document.getElementById('messages-container');
+        const w = document.createElement('div');
+        w.className = 'msg-wrapper'; w.id = 'typing-wrapper';
+        const a = document.createElement('div');
+        a.className = 'msg-avatar-small';
+        a.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 100 10A5 5 0 0012 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>';
+        const t = document.createElement('div');
+        t.className = 'msg bot-msg typing-indicator';
+        t.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+        w.appendChild(a); w.appendChild(t);
+        c.appendChild(w); c.scrollTop = c.scrollHeight;
+    }
+    function hideTyping() { const el = document.getElementById('typing-wrapper'); if (el) el.remove(); }
+
+    async function sendMessage() {
+        const input = document.getElementById('user-input');
+        const text = input.value.trim();
+        if (!text) return;
+        addMessage(text, 'user-msg');
+        input.value = '';
+        chatHistory.push({ role: 'user', content: text });
+        showTyping();
+        document.getElementById('send-btn').disabled = true;
+        try {
+            const res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: chatHistory })
+            });
+            const data = await res.json();
+            hideTyping();
+            addMessage(data.reply, 'bot-msg');
+            chatHistory.push({ role: 'assistant', content: data.reply });
+        } catch (e) {
+            hideTyping();
+            addMessage(getLang().connError, 'error-msg');
+        } finally {
+            document.getElementById('send-btn').disabled = false;
         }
+    }
 
-        async function sendMessage() {
-            const input = document.getElementById('user-input');
-            const text = input.value.trim();
-            if (!text) return;
+    // ── Accessibility ──
+    function toggleAccessPanel() {
+        const panel = document.getElementById('access-panel');
+        const btn = document.getElementById('access-toggle');
+        const open = panel.classList.toggle('visible');
+        btn.classList.toggle('active', open);
+        btn.setAttribute('aria-expanded', open);
+    }
+    function toggleLargeText() {
+        const on = document.body.classList.toggle('large-text');
+        document.getElementById('btn-large').classList.toggle('active', on);
+        document.getElementById('btn-large').setAttribute('aria-pressed', on);
+    }
+    function toggleHighContrast() {
+        const on = document.body.classList.toggle('high-contrast');
+        document.getElementById('btn-contrast').classList.toggle('active', on);
+        document.getElementById('btn-contrast').setAttribute('aria-pressed', on);
+    }
+    function toggleVoice() {
+        voiceEnabled = !voiceEnabled;
+        document.getElementById('btn-voice').classList.toggle('active', voiceEnabled);
+        document.getElementById('btn-voice').setAttribute('aria-pressed', voiceEnabled);
+        if (voiceEnabled) speak(currentLang === 'he' ? 'קריאה קולית מופעלת' : 'Voice reading enabled');
+        else window.speechSynthesis && window.speechSynthesis.cancel();
+    }
+    function resetAccess() {
+        document.body.classList.remove('large-text', 'high-contrast');
+        voiceEnabled = false;
+        ['btn-large','btn-contrast','btn-voice'].forEach(id => {
+            document.getElementById(id).classList.remove('active');
+            document.getElementById(id).setAttribute('aria-pressed', 'false');
+        });
+    }
+    function speak(text) {
+        if (!voiceEnabled || !window.speechSynthesis) return;
+        const langMap = { he:'he-IL', en:'en-US', es:'es-ES', ru:'ru-RU', ar:'ar-SA', am:'am-ET' };
+        const utt = new SpeechSynthesisUtterance(text);
+        utt.lang = langMap[currentLang] || 'he-IL';
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utt);
+    }
 
-            addMessage(text, 'user-msg');
-            input.value = '';
-            chatHistory.push({ role: "user", content: text });
-            showTyping();
-            document.getElementById('send-btn').disabled = true;
-
-            try {
-                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ messages: chatHistory })
-                });
-                const data = await response.json();
-                hideTyping();
-                addMessage(data.reply, 'bot-msg');
-                chatHistory.push({ role: "assistant", content: data.reply });
-            } catch (err) {
-                hideTyping();
-                addMessage('אירעה שגיאה בחיבור. אנא נסה שוב.', 'error-msg');
-            } finally {
-                document.getElementById('send-btn').disabled = false;
-            }
-        }
-
-        function changeLang() {
-            const lang = document.getElementById('lang-selector').value;
-            const greetings = {
-                he: 'שלום! אני כאן לעזור לך. מה תרצה לדעת? 👋',
-                en: "Hello! I'm here to help. What would you like to know? 👋",
-                es: '¡Hola! Estoy aquí para ayudarte. ¿Qué quieres saber? 👋',
-                ru: 'Здравствуйте! Я здесь, чтобы помочь вам. 👋',
-                ar: 'مرحباً! أنا هنا للمساعدة. ماذا تريد أن تعرف؟ 👋',
-                am: 'ሰላም! እርስዎን ለመርዳት እዚህ ነኝ። ምን ማወቅ ይፈልጋሉ? 👋'
-            };
-            document.getElementById('messages-container').innerHTML = '';
-            chatHistory = [];
-            const greeting = greetings[lang] || greetings.he;
-            addMessage(greeting, 'bot-msg');
-            chatHistory.push({ role: "assistant", content: greeting });
-        }
+    // Init
+    applyLang('he');
     </script>
 </body>
 </html>
