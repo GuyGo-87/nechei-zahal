@@ -918,13 +918,13 @@
             am: 'IDF አካል ጉዳተኞች ድርጅት',
         };
         const introLine = {
-            he: `היי, אני ${AGENT_NAME} מארגון נכי צה"ל — אני פה בשבילך.\nאיך אוכל לעזור?`,
-            en: `Hi, I'm ${AGENT_NAME} from the IDF Disabled Veterans Organization — I'm here for you.\nHow can I help?`,
-            fr: `Bonjour, je m'appelle ${AGENT_NAME} de l'Organisation des Vétérans de Tsahal — je suis là pour vous.\nComment puis-je vous aider?`,
-            es: `Hola, soy ${AGENT_NAME} de la Organización de Veteranos de las FDI — estoy aquí para ti.\n¿En qué puedo ayudarte?`,
-            ru: `Привет, я ${AGENT_NAME} из организации инвалидов ЦАХАЛа — я здесь для вас.\nЧем могу помочь?`,
-            ar: `مرحباً، أنا ${AGENT_NAME} من منظمة معاقي الجيش الإسرائيلي — أنا هنا من أجلك.\nكيف يمكنني مساعدتك؟`,
-            am: `ሰላም፣ እኔ ${AGENT_NAME} ነኝ ከIDF አካል ጉዳተኞች ድርጅት — ለእርስዎ እዚህ ነኝ።\nእንዴት ልረዳዎ?`,
+            he: `אני ${AGENT_NAME} מארגון נכי צה"ל — אנחנו פה בשבילך! איך אוכל לעזור?`,
+            en: `I'm ${AGENT_NAME} from the IDF Disabled Veterans Organization — we're here for you! How can I help?`,
+            fr: `Je suis ${AGENT_NAME} de l'Organisation des Vétérans de Tsahal — nous sommes là pour vous! Comment puis-je vous aider?`,
+            es: `Soy ${AGENT_NAME} de la Organización de Veteranos de las FDI — ¡estamos aquí para ti! ¿En qué puedo ayudarte?`,
+            ru: `Я ${AGENT_NAME} из организации инвалидов ЦАХАЛа — мы здесь для вас! Чем могу помочь?`,
+            ar: `أنا ${AGENT_NAME} من منظمة معاقي الجيش الإسرائيلي — نحن هنا من أجلك! كيف يمكنني مساعدتك؟`,
+            am: `እኔ ${AGENT_NAME} ነኝ ከIDF አካል ጉዳተኞች ድርጅት — እኛ ለእርስዎ እዚህ ነን! እንዴት ልረዳዎ?`,
         };
 
         const c = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -961,11 +961,12 @@
         root.setAttribute('dir', L.dir);
 
         // Header
-        document.getElementById('header-title').textContent = L.headerTitle;
+        document.getElementById('header-title').textContent = AGENT_NAME;
         document.getElementById('header-subtitle').innerHTML = L.headerSubtitle;
         // Show agent name in header
         const nameEl = document.getElementById('agent-name-display');
-        if (nameEl) nameEl.textContent = AGENT_NAME;
+        const orgShort = { he:'ארגון נכי צה"ל', en:'INZ', fr:'INZ', es:'INZ', ru:'INZ', ar:'INZ', am:'INZ' };
+        if (nameEl) nameEl.textContent = orgShort[code] || 'INZ';
 
         // Welcome banner
         document.getElementById('welcome-strong').textContent = L.welcomeStrong;
