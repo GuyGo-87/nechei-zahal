@@ -494,12 +494,12 @@
                     <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 100 10A5 5 0 0012 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
                 </div>
                 <div>
-                    <div class="header-title" id="header-title">ארגון נכי צה"ל</div>
+                    <div class="header-title" id="header-title">
+                        <span id="agent-name-display"></span><span id="agent-org-display" style="opacity:0.55;font-weight:400;margin-right:6px;margin-left:6px;font-size:12px;"></span>
+                    </div>
                     <div class="header-subtitle">
                         <span class="status-dot"></span>
                         <span id="header-subtitle">פעיל ומוכן לעזור</span>
-                        <span style="opacity:0.4;margin:0 3px">·</span>
-                        <span id="agent-name-display" style="color:var(--gold);font-weight:600;"></span>
                     </div>
                 </div>
             </div>
@@ -834,8 +834,19 @@
 
     // ── Smart Contextual Greeting ──
     // Random agent names — picked once per page load
-    const AGENT_NAMES = ['Sharon', 'Ariel', 'Noam', 'Adam'];
-    const AGENT_NAME = AGENT_NAMES[Math.floor(Math.random() * AGENT_NAMES.length)];
+    const AGENT_POOL = [
+        { he:'שרון',  ar:'شارون', default:'Sharon' },
+        { he:'אריאל', ar:'أرييل', default:'Ariel'  },
+        { he:'נועם',  ar:'نوعام', default:'Noam'   },
+        { he:'אדם',   ar:'آدم',   default:'Adam'   },
+    ];
+    const AGENT_ENTRY = AGENT_POOL[Math.floor(Math.random() * AGENT_POOL.length)];
+    function getAgentName(lang) {
+        if (lang === 'he') return AGENT_ENTRY.he;
+        if (lang === 'ar') return AGENT_ENTRY.ar;
+        return AGENT_ENTRY.default;
+    }
+    const AGENT_NAME = AGENT_ENTRY.default; // fallback for server
 
     function getSmartGreeting(lang) {
         const now = new Date();
@@ -918,13 +929,13 @@
             am: 'IDF አካል ጉዳተኞች ድርጅት',
         };
         const introLine = {
-            he: `אני ${AGENT_NAME} מארגון נכי צה"ל — אנחנו פה בשבילך! איך אוכל לעזור?`,
-            en: `I'm ${AGENT_NAME} from the IDF Disabled Veterans Organization — we're here for you! How can I help?`,
-            fr: `Je suis ${AGENT_NAME} de l'Organisation des Vétérans de Tsahal — nous sommes là pour vous! Comment puis-je vous aider?`,
-            es: `Soy ${AGENT_NAME} de la Organización de Veteranos de las FDI — ¡estamos aquí para ti! ¿En qué puedo ayudarte?`,
-            ru: `Я ${AGENT_NAME} из организации инвалидов ЦАХАЛа — мы здесь для вас! Чем могу помочь?`,
-            ar: `أنا ${AGENT_NAME} من منظمة معاقي الجيش الإسرائيلي — نحن هنا من أجلك! كيف يمكنني مساعدتك؟`,
-            am: `እኔ ${AGENT_NAME} ነኝ ከIDF አካል ጉዳተኞች ድርጅት — እኛ ለእርስዎ እዚህ ነን! እንዴት ልረዳዎ?`,
+            he: `אני ${getAgentName("he")} מארגון נכי צה"ל — אנחנו פה בשבילך! איך אוכל לעזור?`,
+            en: `I'm ${getAgentName('en')} from the IDF Disabled Veterans Organization — we're here for you! How can I help?`,
+            fr: `Je suis ${getAgentName('fr')} de l'Organisation des Vétérans de Tsahal — nous sommes là pour vous! Comment puis-je vous aider?`,
+            es: `Soy ${getAgentName('es')} de la Organización de Veteranos de las FDI — ¡estamos aquí para ti! ¿En qué puedo ayudarte?`,
+            ru: `Я ${getAgentName('ru')} из организации инвалидов ЦАХАЛа — мы здесь для вас! Чем могу помочь?`,
+            ar: `أنا ${getAgentName("ar")} من منظمة معاقي الجيش الإسرائيلي — نحن هنا من أجلك! كيف يمكنني مساعدتك؟`,
+            am: `እኔ ${getAgentName('am')} ነኝ ከIDF አካል ጉዳተኞች ድርጅት — እኛ ለእርስዎ እዚህ ነን! እንዴት ልረዳዎ?`,
         };
 
         const c = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -961,12 +972,22 @@
         root.setAttribute('dir', L.dir);
 
         // Header
-        document.getElementById('header-title').textContent = AGENT_NAME;
+        document.getElementById('header-title'); // title built from spans below
         document.getElementById('header-subtitle').innerHTML = L.headerSubtitle;
         // Show agent name in header
         const nameEl = document.getElementById('agent-name-display');
-        const orgShort = { he:'ארגון נכי צה"ל', en:'INZ', fr:'INZ', es:'INZ', ru:'INZ', ar:'INZ', am:'INZ' };
-        if (nameEl) nameEl.textContent = orgShort[code] || 'INZ';
+        if (nameEl) nameEl.textContent = getAgentName(code);
+        const orgShort = {
+            he: 'ארגון נכי צה"ל',
+            en: 'IDF Disabled Veterans',
+            fr: 'Vétérans de Tsahal',
+            es: 'Veteranos FDI',
+            ru: 'Инвалиды ЦАХАЛа',
+            ar: 'معاقو الجيش الإسرائيلي',
+            am: 'IDF አካል ጉዳተኞች',
+        };
+        const orgEl = document.getElementById('agent-org-display');
+        if (orgEl) orgEl.textContent = orgShort[code] || 'INZ';
 
         // Welcome banner
         document.getElementById('welcome-strong').textContent = L.welcomeStrong;
