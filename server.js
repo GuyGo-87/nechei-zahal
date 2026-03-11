@@ -290,7 +290,7 @@ RULES:
 // ============================================================
 // LAYER 7: GEMINI API CALL WITH TIMEOUT
 // ============================================================
-async function callGemini(contents) {
+async function callGemini(contents, systemPrompt) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 25000);
 
@@ -301,7 +301,7 @@ async function callGemini(contents) {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+                    system_instruction: { parts: [{ text: systemPrompt || SYSTEM_PROMPT }] },
                     contents,
                     generationConfig: { temperature: 0.5, maxOutputTokens: 1000 }
                 }),
@@ -324,26 +324,98 @@ async function callGemini(contents) {
 // ============================================================
 app.use(express.static(path.join(__dirname)));
 
+
+// ============================================================
+// MULTILINGUAL ERROR MESSAGES
+// ============================================================
+const ERROR_MSGS = {
+    he: {
+        quota:   "מערכת ה-AI עמוסה כרגע. אנא נסה שוב בעוד מספר דקות.",
+        config:  "שגיאת הגדרה במערכת. אנא צור קשר עם מנהל האתר.",
+        timeout: "העיבוד לוקח יותר מדי זמן — אנא נסה שוב.",
+        generic: "משהו השתבש. אנא נסה שוב.",
+        nokey:   "המערכת אינה מוגדרת כראוי. אנא נסה שוב מאוחר יותר.",
+    },
+    en: {
+        quota:   "The AI is currently busy. Please try again in a few minutes.",
+        config:  "System configuration error. Please contact the site admin.",
+        timeout: "Processing is taking too long — please try again.",
+        generic: "Something went wrong. Please try again.",
+        nokey:   "The system is not configured properly. Please try again later.",
+    },
+    fr: {
+        quota:   "L’IA est actuellement surchargée. Veuillez réessayer dans quelques minutes.",
+        config:  "Erreur de configuration système. Contactez l’administrateur.",
+        timeout: "Le traitement prend trop de temps — veuillez réessayer.",
+        generic: "Une erreur s’est produite. Veuillez réessayer.",
+        nokey:   "Le système n’est pas correctement configuré. Réessayez plus tard.",
+    },
+    es: {
+        quota:   "La IA está ocupada ahora. Por favor, inténtalo de nuevo en unos minutos.",
+        config:  "Error de configuración del sistema. Contacta al administrador.",
+        timeout: "El procesamiento está tardando demasiado — por favor, inténtalo de nuevo.",
+        generic: "Algo salió mal. Por favor, inténtalo de nuevo.",
+        nokey:   "El sistema no está configurado correctamente. Inténtalo más tarde.",
+    },
+    ru: {
+        quota:   "ИИ сейчас перегружен. Пожалуйста, попробуйте снова через несколько минут.",
+        config:  "Ошибка конфигурации системы. Обратитесь к администратору.",
+        timeout: "Обработка занимает слишком много времени — попробуйте снова.",
+        generic: "Что-то пошло не так. Пожалуйста, попробуйте снова.",
+        nokey:   "Система настроена неправильно. Попробуйте позже.",
+    },
+    ar: {
+        quota:   "الذكاء الاصطناعي مشغول حالياً. يرجى المحاولة مرة أخرى بعد دقائق.",
+        config:  "خطأ في إعداد النظام. يرجى التواصل مع المسؤول.",
+        timeout: "المعالجة تستغرق وقتاً طويلاً — يرجى المحاولة مجدداً.",
+        generic: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+        nokey:   "النظام غير مهيأ بشكل صحيح. يرجى المحاولة لاحقاً.",
+    },
+    am: {
+        quota:   "AI አሁን ሥራ ተጠምዷል። በጥቂት ደቂቃዎች ውስጥ እንደገና ይሞክሩ።",
+        config:  "የስርዓት ውቅር ስህተት። እባክዎ አስተዳዳሪውን ያነጋግሩ።",
+        timeout: "ሂደቱ ረጅም ጊዜ እየፈጀ ነው — እንደገና ይሞክሩ።",
+        generic: "ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።",
+        nokey:   "ስርዓቱ በትክክል አልተዋቀረም። ቆየት ብለው ይሞክሩ።",
+    },
+};
+function errMsg(lang, key) {
+    return (ERROR_MSGS[lang] || ERROR_MSGS['he'])[key] || ERROR_MSGS['he'][key];
+}
+
 // ============================================================
 // LAYER 9: CHAT ENDPOINT
 // ============================================================
 app.post("/api/chat", validateChatInput, async (req, res) => {
     if (!GEMINI_API_KEY) {
-        return res.status(503).json({ reply: "המערכת אינה מוגדרת כראוי. אנא נסה שוב מאוחר יותר." });
+        const bodyLang = req.body?.lang; const bl = ["he","en","fr","es","ru","ar","am"].includes(bodyLang) ? bodyLang : "he"; return res.status(503).json({ reply: errMsg(bl, "nokey") });
     }
 
     try {
-        const { messages } = req.body;
+        const { messages, lang } = req.body;
+        const clientLang = ['he','en','fr','es','ru','ar','am'].includes(lang) ? lang : 'he';
+
+        // Detect active language from the first hidden lock message
+        let activeLang = 'Hebrew';
+        const firstMsg = messages[0]?.content || '';
+        const langMatch = firstMsg.match(/respond only in (\w+)/i);
+        if (langMatch) activeLang = langMatch[1];
+
+        // Build dynamic system prompt with language locked in
+        const dynamicPrompt = SYSTEM_PROMPT + `\n\nCRITICAL ACTIVE LANGUAGE OVERRIDE: This entire conversation MUST be in ${activeLang} only. Every single response must be in ${activeLang}. Do not use any other language under any circumstances.`;
 
         // Log key presence (never the key itself)
-        console.log(`[CHAT] Request from ${req.ip} | GEMINI_KEY: ${!!GEMINI_API_KEY} | Messages: ${messages.length}`);
+        console.log(`[CHAT] Request from ${req.ip} | GEMINI_KEY: ${!!GEMINI_API_KEY} | Messages: ${messages.length} | Lang: ${activeLang}`);
 
-        const contents = messages.slice(-12).map(m => ({
+        // Always keep first 2 (lang lock) + last 10 messages
+        const lockMsgs = messages.slice(0, 2);
+        const recentMsgs = messages.slice(2).slice(-10);
+        const contents = [...lockMsgs, ...recentMsgs].map(m => ({
             role: m.role === "user" ? "user" : "model",
             parts: [{ text: String(m.content).trim() }]
         }));
 
-        const geminiRes = await callGemini(contents);
+        const geminiRes = await callGemini(contents, dynamicPrompt);
         const data = await geminiRes.json();
 
         // Gemini returned an error object
@@ -354,27 +426,26 @@ app.post("/api/chat", validateChatInput, async (req, res) => {
 
             // Quota exceeded (429) — tell user clearly
             if (code === 429 || msg.toLowerCase().includes("quota")) {
-                return res.status(503).json({ reply: "מערכת ה-AI עמוסה כרגע. אנא נסה שוב בעוד מספר דקות." });
+                return res.status(503).json({ reply: errMsg(clientLang, "quota") });
             }
             // Invalid API key (400/403)
             if (code === 400 || code === 403) {
-                return res.status(503).json({ reply: "שגיאת הגדרה במערכת. אנא צור קשר עם מנהל האתר." });
+                return res.status(503).json({ reply: errMsg(clientLang, "config") });
             }
             throw new Error(`Gemini ${code}: ${msg}`);
         }
 
         const reply = data.candidates?.[0]?.content?.parts?.[0]?.text
-            ?? "מצטער, לא הצלחתי לעבד את התשובה. אנא נסה שוב.";
+            ?? errMsg(clientLang, "generic");
 
         res.json({ reply });
 
     } catch (err) {
         const isTimeout = err.message?.includes("TIMEOUT");
         console.error(`[CHAT ERROR] ${isTimeout ? "Timeout" : "API Error"}: ${err.message}`);
+        const cl = req.body?.lang; const cll = ["he","en","fr","es","ru","ar","am"].includes(cl) ? cl : "he";
         res.status(isTimeout ? 504 : 500).json({
-            reply: isTimeout
-                ? "העיבוד לוקח יותר מדי זמן — אנא נסה שוב."
-                : "משהו השתבש. אנא נסה שוב."
+            reply: isTimeout ? errMsg(cll, "timeout") : errMsg(cll, "generic")
         });
     }
 });
