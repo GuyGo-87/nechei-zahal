@@ -498,6 +498,8 @@
                     <div class="header-subtitle">
                         <span class="status-dot"></span>
                         <span id="header-subtitle">פעיל ומוכן לעזור</span>
+                        <span style="opacity:0.4;margin:0 3px">·</span>
+                        <span id="agent-name-display" style="color:var(--gold);font-weight:600;"></span>
                     </div>
                 </div>
             </div>
@@ -831,6 +833,10 @@
     let currentLang = 'he';
 
     // ── Smart Contextual Greeting ──
+    // Random agent names — picked once per page load
+    const AGENT_NAMES = ['Sharon', 'Ariel', 'Noam', 'Adam'];
+    const AGENT_NAME = AGENT_NAMES[Math.floor(Math.random() * AGENT_NAMES.length)];
+
     function getSmartGreeting(lang) {
         const now = new Date();
         const hour = now.getHours();
@@ -945,7 +951,7 @@
         }
 
         lines.push(`${greet} 👋`);
-        lines.push(`${assistantLine[lang] || assistantLine['en']} ${thankYou[lang] || thankYou['en']}`);
+        lines.push(introLine[lang] || introLine['en']);
         lines.push(closing);
 
         return lines.join('\n');
@@ -967,6 +973,9 @@
         // Header
         document.getElementById('header-title').textContent = L.headerTitle;
         document.getElementById('header-subtitle').innerHTML = L.headerSubtitle;
+        // Show agent name in header
+        const nameEl = document.getElementById('agent-name-display');
+        if (nameEl) nameEl.textContent = AGENT_NAME;
 
         // Welcome banner
         document.getElementById('welcome-strong').textContent = L.welcomeStrong;
@@ -1266,7 +1275,7 @@
             const res = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ messages: chatHistory, lang: currentLang })
+                body: JSON.stringify({ messages: chatHistory, lang: currentLang, agentName: AGENT_NAME })
             });
             const data = await res.json();
             hideTyping();
