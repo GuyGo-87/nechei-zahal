@@ -528,7 +528,7 @@
         <!-- Input -->
         <div class="input-area">
             <input type="text" id="user-input" onkeypress="handleKey(event)" autocomplete="off" aria-label="הקלד הודעה">
-            <button id="send-btn" onclick="sendMessage()" aria-label="שלח">
+            <button id="send-btn" onclick="sendMessage()" id="send-btn-aria" aria-label="שלח">
                 <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
             </button>
         </div>
@@ -536,7 +536,7 @@
         <div class="chat-footer-credit">
             <span id="footer-text">מופעל על ידי</span>
             <a href="https://www.inz.org.il" target="_blank" rel="noopener">ארגון נכי צה"ל</a>
-            &middot; AI Assistant
+            &middot; <span id="footer-assistant">AI Assistant</span>
         </div>
     </div>
 
@@ -559,6 +559,17 @@
             txtReset: 'איפוס',
             footerText: 'מופעל על ידי',
             connError: 'אירעה שגיאה בחיבור. אנא נסה שוב.',
+            distLoading: 'מחשב מסלול מ',
+            distError: 'לא ניתן לחשב מרחק כעת',
+            distBadge: 'לפי Google Maps',
+            distText: 'נמצא רק {km} ק"מ ו-{time} נסיעה מ',
+            distFrom: 'מ',
+            navGoogle: 'Google Maps',
+            navWaze: 'Waze',
+            facilityPrefix: 'בית הלוחם ',
+            voiceOn: 'קריאה קולית מופעלת',
+            sendLabel: 'שלח',
+            typing: 'מקליד...',
             shortcuts: [
                 { icon: '&#128176;', label: 'הלוואות', query: 'ספר לי על הלוואות' },
                 { icon: '&#127891;', label: 'מלגות', query: 'מידע על מלגות לימודים' },
@@ -584,6 +595,17 @@
             txtReset: 'Reset',
             footerText: 'Powered by',
             connError: 'Connection error. Please try again.',
+            distLoading: 'Calculating route from ',
+            distError: 'Unable to calculate distance right now',
+            distBadge: 'Via Google Maps',
+            distText: 'is only {km} km and {time} drive from ',
+            distFrom: 'from ',
+            navGoogle: 'Google Maps',
+            navWaze: 'Waze',
+            facilityPrefix: 'Beit HaLochem ',
+            voiceOn: 'Voice reading enabled',
+            sendLabel: 'Send',
+            typing: 'Typing...',
             shortcuts: [
                 { icon: '&#128176;', label: 'Loans', query: 'Tell me about loans' },
                 { icon: '&#127891;', label: 'Scholarships', query: 'Information about scholarships' },
@@ -609,6 +631,17 @@
             txtReset: 'Restablecer',
             footerText: 'Desarrollado por',
             connError: 'Error de conexión. Por favor, inténtalo de nuevo.',
+            distLoading: 'Calculando ruta desde ',
+            distError: 'No se puede calcular la distancia ahora',
+            distBadge: 'Según Google Maps',
+            distText: 'está a solo {km} km y {time} en coche desde ',
+            distFrom: 'desde ',
+            navGoogle: 'Google Maps',
+            navWaze: 'Waze',
+            facilityPrefix: 'Beit HaLochem ',
+            voiceOn: 'Lectura de voz activada',
+            sendLabel: 'Enviar',
+            typing: 'Escribiendo...',
             shortcuts: [
                 { icon: '&#128176;', label: 'Préstamos', query: 'Información sobre préstamos' },
                 { icon: '&#127891;', label: 'Becas', query: 'Información sobre becas' },
@@ -634,6 +667,17 @@
             txtReset: 'Сброс',
             footerText: 'Работает на',
             connError: 'Ошибка соединения. Пожалуйста, попробуйте снова.',
+            distLoading: 'Рассчитываю маршрут из ',
+            distError: 'Не удалось рассчитать расстояние',
+            distBadge: 'По данным Google Maps',
+            distText: 'находится всего в {km} км и {time} езды от ',
+            distFrom: 'от ',
+            navGoogle: 'Google Maps',
+            navWaze: 'Waze',
+            facilityPrefix: 'Бейт-аЛохем ',
+            voiceOn: 'Голосовое чтение включено',
+            sendLabel: 'Отправить',
+            typing: 'Печатает...',
             shortcuts: [
                 { icon: '&#128176;', label: 'Кредиты', query: 'Расскажи о кредитах' },
                 { icon: '&#127891;', label: 'Стипендии', query: 'Информация о стипендиях' },
@@ -659,6 +703,17 @@
             txtReset: 'إعادة تعيين',
             footerText: 'مدعوم من',
             connError: 'خطأ في الاتصال. يرجى المحاولة مرة أخرى.',
+            distLoading: 'جاري حساب المسار من ',
+            distError: 'تعذر حساب المسافة الآن',
+            distBadge: 'وفقاً لـ Google Maps',
+            distText: 'يبعد {km} كم فقط و{time} بالسيارة من ',
+            distFrom: 'من ',
+            navGoogle: 'خرائط جوجل',
+            navWaze: 'ويز',
+            facilityPrefix: 'بيت المحارب ',
+            voiceOn: 'تم تفعيل القراءة الصوتية',
+            sendLabel: 'إرسال',
+            typing: 'يكتب...',
             shortcuts: [
                 { icon: '&#128176;', label: 'القروض', query: 'أخبرني عن القروض' },
                 { icon: '&#127891;', label: 'المنح', query: 'معلومات عن المنح الدراسية' },
@@ -684,6 +739,17 @@
             txtReset: 'ዳግም አስጀምር',
             footerText: 'በ',
             connError: 'የግንኙነት ስህተት። እባክዎ እንደገና ይሞክሩ።',
+            distLoading: 'ከ',
+            distError: 'ርቀቱን ማስላት አልተቻለም',
+            distBadge: 'Google Maps መሠረት',
+            distText: '{km} ኪሜ እና {time} ሩቅ ነው ከ',
+            distFrom: 'ከ',
+            navGoogle: 'Google Maps',
+            navWaze: 'Waze',
+            facilityPrefix: 'ቤት ሃሎቸም ',
+            voiceOn: 'የድምፅ ንባብ ነቅቷል',
+            sendLabel: 'ላክ',
+            typing: 'እየጻፈ...',
             shortcuts: [
                 { icon: '&#128176;', label: 'ብድር', query: 'ስለ ብድር ንገረኝ' },
                 { icon: '&#127891;', label: 'ስኮላርሺፕ', query: 'ስለ ስኮላርሺፕ መረጃ' },
@@ -709,6 +775,17 @@
             txtReset: 'Réinitialiser',
             footerText: 'Propulsé par',
             connError: 'Erreur de connexion. Veuillez réessayer.',
+            distLoading: 'Calcul de l'itinéraire depuis ',
+            distError: 'Impossible de calculer la distance pour l'instant',
+            distBadge: 'Selon Google Maps',
+            distText: 'est à seulement {km} km et {time} en voiture depuis ',
+            distFrom: 'depuis ',
+            navGoogle: 'Google Maps',
+            navWaze: 'Waze',
+            facilityPrefix: 'Beit HaLochem ',
+            voiceOn: 'Lecture vocale activée',
+            sendLabel: 'Envoyer',
+            typing: 'En train d'écrire...',
             shortcuts: [
                 { icon: '&#128176;', label: 'Prêts', query: 'Parlez-moi des prêts disponibles' },
                 { icon: '&#127891;', label: 'Bourses', query: 'Informations sur les bourses' },
@@ -730,49 +807,45 @@
         const month = now.getMonth() + 1; // 1-based
         const date  = now.getDate();
 
-        // Jewish Holidays (approximate Gregorian dates, good for 2024-2026)
-        const holidays = {
-            he: [
-                { m:3,  d:13, name:'פורים שמח! 🎭' },
-                { m:3,  d:14, name:'פורים שמח! 🎭' },
-                { m:4,  d:12, name:'חג פסח שמח! 🍷' },
-                { m:4,  d:13, name:'חג פסח שמח! 🍷' },
-                { m:4,  d:18, name:'חג פסח שמח! 🍷' },
-                { m:4,  d:19, name:'חג פסח שמח! 🍷' },
-                { m:4,  d:23, name:'יום העצמאות שמח! 🇮🇱' },
-                { m:6,  d:1,  name:'חג שבועות שמח! 📜' },
-                { m:6,  d:2,  name:'חג שבועות שמח! 📜' },
-                { m:9,  d:22, name:'שנה טובה! ראש השנה שמח 🍎' },
-                { m:9,  d:23, name:'שנה טובה! ראש השנה שמח 🍎' },
-                { m:10, d:1,  name:'גמר חתימה טובה! צום קל ביום כיפור 🕍' },
-                { m:10, d:6,  name:'חג סוכות שמח! 🌿' },
-                { m:10, d:7,  name:'חג סוכות שמח! 🌿' },
-                { m:10, d:13, name:'חג שמיני עצרת שמח! 🎉' },
-                { m:10, d:14, name:'חג שמחת תורה שמח! 📖' },
-                { m:12, d:25, name:'חנוכה שמח! 🕎' },
-                { m:12, d:26, name:'חנוכה שמח! 🕎' },
-                { m:12, d:27, name:'חנוכה שמח! 🕎' },
-                { m:1,  d:1,  name:'חנוכה שמח! 🕎' },
-                { m:1,  d:2,  name:'חנוכה שמח! 🕎' },
-            ],
-            en: [
-                { m:9,  d:22, name:"Shana Tova! Happy Jewish New Year 🍎" },
-                { m:4,  d:12, name:"Happy Passover! 🍷" },
-                { m:4,  d:23, name:"Happy Independence Day! 🇮🇱" },
-                { m:12, d:25, name:"Happy Hanukkah! 🕎" },
-            ]
+        // Jewish Holidays — all 7 languages
+        const holidayNames = {
+            purim:    { he:'פורים שמח! 🎭', en:'Happy Purim! 🎭', fr:'Joyeux Pourim! 🎭', es:'¡Feliz Purim! 🎭', ru:'С Пуримом! 🎭', ar:'عيد بوريم سعيد! 🎭', am:'የፑሪም በዓል ደስ ይበልዎ! 🎭' },
+            pesach:   { he:'חג פסח שמח! 🍷', en:'Happy Passover! 🍷', fr:'Joyeuse Pâque Juive! 🍷', es:'¡Feliz Pésaj! 🍷', ru:'С Песахом! 🍷', ar:'عيد الفصح سعيد! 🍷', am:'ደስተኛ የፋሲካ በዓል! 🍷' },
+            independence: { he:'יום העצמאות שמח! 🇮🇱', en:'Happy Independence Day! 🇮🇱', fr:'Joyeuse Fête de l\'Indépendance! 🇮🇱', es:'¡Feliz Día de la Independencia! 🇮🇱', ru:'С Днём Независимости! 🇮🇱', ar:'عيد الاستقلال سعيد! 🇮🇱', am:'ደስተኛ የነጻነት ቀን! 🇮🇱' },
+            shavuot:  { he:'חג שבועות שמח! 📜', en:'Happy Shavuot! 📜', fr:'Joyeuse Chavouot! 📜', es:'¡Feliz Shavuot! 📜', ru:'С Шавуотом! 📜', ar:'عيد شافوعوت سعيد! 📜', am:'ደስተኛ ሻቩኦት! 📜' },
+            roshHashana: { he:'שנה טובה! ראש השנה שמח 🍎', en:'Shana Tova! Happy New Year 🍎', fr:'Shana Tova! Bonne Année Juive 🍎', es:'¡Shanah Tovah! Feliz Año Nuevo Judío 🍎', ru:'Шана Това! С Еврейским Новым Годом 🍎', ar:'سنة طيبة! رأس السنة اليهودية سعيد 🍎', am:'ሻና ቶቫ! ደስተኛ አዲስ ዓመት 🍎' },
+            yomKippur: { he:'גמר חתימה טובה! צום קל ביום כיפור 🕍', en:'G\'mar Chatima Tova! Easy fast on Yom Kippur 🕍', fr:'Gmar Hatima Tova! Bon jeûne de Yom Kippour 🕍', es:'¡Gmar Jatimá Tová! Fácil ayuno en Yom Kipur 🕍', ru:'Гмар Хатима Това! Лёгкого поста в Йом Кипур 🕍', ar:'ختام طيب! صيام خفيف في يوم الغفران 🕍', am:'ቀላል ጾም! ዮም ኪፑር 🕍' },
+            sukkot:   { he:'חג סוכות שמח! 🌿', en:'Happy Sukkot! 🌿', fr:'Joyeuse Souccot! 🌿', es:'¡Feliz Sucot! 🌿', ru:'С Суккотом! 🌿', ar:'عيد العُرش سعيد! 🌿', am:'ደስተኛ ሱኮት! 🌿' },
+            shminiAtzeret: { he:'חג שמיני עצרת שמח! 🎉', en:'Happy Shemini Atzeret! 🎉', fr:'Joyeux Chemini Atseret! 🎉', es:'¡Feliz Sheminí Atzéret! 🎉', ru:'С Шмини Ацерет! 🎉', ar:'عيد الختام سعيد! 🎉', am:'ደስተኛ ሽሚኒ አትዘሬት! 🎉' },
+            simchatTorah: { he:'חג שמחת תורה שמח! 📖', en:'Happy Simchat Torah! 📖', fr:'Joyeuse Simhat Torah! 📖', es:'¡Feliz Simjat Torá! 📖', ru:'С Симхат Тора! 📖', ar:'عيد فرحة التوراة سعيد! 📖', am:'ደስተኛ ሲምሃት ቶራ! 📖' },
+            hanukkah: { he:'חנוכה שמח! 🕎', en:'Happy Hanukkah! 🕎', fr:'Joyeuse Hanoukka! 🕎', es:'¡Feliz Janucá! 🕎', ru:'С Ханукой! 🕎', ar:'عيد الحنوكة سعيد! 🕎', am:'ደስተኛ ሃኑካ! 🕎' },
         };
+        const shabbatGreet = { he:'שבת שלום! 🕯️', en:'Shabbat Shalom! 🕯️', fr:'Chabbat Chalom! 🕯️', es:'¡Shabat Shalom! 🕯️', ru:'Шаббат Шалом! 🕯️', ar:'شبات شالوم! 🕯️', am:'ሻባት ሻሎም! 🕯️' };
+        const erevShabbatGreet = { he:'שבת שלום! כבר מכינים לשבת 🕯️', en:'Shabbat Shalom! 🕯️', fr:'Chabbat Chalom! 🕯️', es:'¡Shabat Shalom! 🕯️', ru:'Шаббат Шалом! 🕯️', ar:'شبات شالوم! 🕯️', am:'ሻባት ሻሎም! 🕯️' };
 
-        // Days in Hebrew
-        const daysHe = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
-        const daysEn = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        const holidayCalendar = [
+            { m:3,  d:13, key:'purim' }, { m:3,  d:14, key:'purim' },
+            { m:4,  d:12, key:'pesach' }, { m:4,  d:13, key:'pesach' },
+            { m:4,  d:18, key:'pesach' }, { m:4,  d:19, key:'pesach' },
+            { m:4,  d:23, key:'independence' },
+            { m:6,  d:1,  key:'shavuot' }, { m:6,  d:2, key:'shavuot' },
+            { m:9,  d:22, key:'roshHashana' }, { m:9,  d:23, key:'roshHashana' },
+            { m:10, d:1,  key:'yomKippur' },
+            { m:10, d:6,  key:'sukkot' }, { m:10, d:7, key:'sukkot' },
+            { m:10, d:13, key:'shminiAtzeret' },
+            { m:10, d:14, key:'simchatTorah' },
+            { m:12, d:25, key:'hanukkah' }, { m:12, d:26, key:'hanukkah' },
+            { m:12, d:27, key:'hanukkah' }, { m:1, d:1, key:'hanukkah' },
+            { m:1,  d:2,  key:'hanukkah' },
+        ];
 
-        // Check for holiday
-        const holidayList = holidays[lang] || holidays['en'];
-        const todayHoliday = holidayList && holidayList.find(h => h.m === month && h.d === date);
+        const todayHolidayEntry = holidayCalendar.find(h => h.m === month && h.d === date);
+        const todayHoliday = todayHolidayEntry
+            ? (holidayNames[todayHolidayEntry.key][lang] || holidayNames[todayHolidayEntry.key]['en'])
+            : null;
 
-        // Time of day
-        let timeGreet = { he:'', en:'', fr:'', es:'', ru:'', ar:'', am:'' };
+        // Time of day greetings — all 7 languages
+        let timeGreet;
         if (hour >= 5 && hour < 12) {
             timeGreet = { he:'בוקר טוב', en:'Good morning', fr:'Bonjour', es:'Buenos días', ru:'Доброе утро', ar:'صباح الخير', am:'እንደምን አደሩ' };
         } else if (hour >= 12 && hour < 14) {
@@ -785,67 +858,64 @@
             timeGreet = { he:'לילה טוב', en:'Good night', fr:'Bonne nuit', es:'Buenas noches', ru:'Доброй ночи', ar:'تصبح على خير', am:'ሌሊቱን መልካም' };
         }
 
-        // Shabbat special
-        const isShabbat = day === 6;
+        const isShabbat     = day === 6;
         const isErevShabbat = day === 5 && hour >= 14;
+
+        // Per-language closing questions (varied)
+        const closings = {
+            he: ['במה אוכל לעזור לך היום?', 'איך אוכל לסייע לך?', 'מה תרצה לדעת?', 'ספר לי — במה אוכל לעזור?'],
+            en: ['How can I help you today?', 'What can I do for you?', 'What would you like to know?'],
+            fr: ['Comment puis-je vous aider?', 'Que puis-je faire pour vous?', 'Que souhaitez-vous savoir?'],
+            es: ['¿En qué puedo ayudarle?', '¿Qué puedo hacer por usted?', '¿Qué desea saber?'],
+            ru: ['Чем могу помочь?', 'Как я могу вам помочь?', 'Что вы хотите узнать?'],
+            ar: ['كيف يمكنني مساعدتك؟', 'ماذا تريد أن تعرف؟', 'بماذا أستطيع مساعدتك؟'],
+            am: ['እንዴት ልረዳዎ?', 'ምን ማወቅ ይፈልጋሉ?'],
+        };
+        const orgNames = {
+            he: 'ארגון נכי צה"ל',
+            en: 'IDF Disabled Veterans Organization',
+            fr: 'l\'Organisation des Vétérans Handicapés de Tsahal',
+            es: 'la Organización de Veteranos de las FDI',
+            ru: 'организации инвалидов ЦАХАЛа',
+            ar: 'منظمة معاقي الجيش الإسرائيلي',
+            am: 'IDF አካል ጉዳተኞች ድርጅት',
+        };
+        const thankYou = {
+            he: 'תודה על שירותך — אנחנו כאן בשבילך.',
+            en: 'Thank you for your service — we\'re here for you.',
+            fr: 'Merci pour votre service — nous sommes là pour vous.',
+            es: 'Gracias por su servicio — estamos aquí para usted.',
+            ru: 'Спасибо за вашу службу — мы здесь для вас.',
+            ar: 'شكراً لخدمتك — نحن هنا من أجلك.',
+            am: 'አገልግሎትዎ ያስመሰግናል — እዚህ ለእርስዎ ነን።',
+        };
+        const assistantLine = {
+            he: `אני העוזר החכם של ${orgNames['he']}.`,
+            en: `I'm the smart assistant of the ${orgNames['en']}.`,
+            fr: `Je suis l'assistant intelligent de ${orgNames['fr']}.`,
+            es: `Soy el asistente de ${orgNames['es']}.`,
+            ru: `Я помощник ${orgNames['ru']}.`,
+            ar: `أنا المساعد الذكي لـ${orgNames['ar']}.`,
+            am: `የ${orgNames['am']} ብልህ ረዳት ነኝ።`,
+        };
+
+        const c = (arr) => arr[Math.floor(Math.random() * arr.length)];
+        const greet = timeGreet[lang] || timeGreet['en'];
+        const closing = c(closings[lang] || closings['en']);
 
         let lines = [];
 
         if (todayHoliday) {
-            lines.push(todayHoliday.name);
+            lines.push(todayHoliday);
         } else if (isShabbat) {
-            lines.push(lang === 'he' ? 'שבת שלום! 🕯️' : 'Shabbat Shalom! 🕯️');
+            lines.push(shabbatGreet[lang] || shabbatGreet['en']);
         } else if (isErevShabbat) {
-            lines.push(lang === 'he' ? 'שבת שלום! כבר מכינים לשבת 🕯️' : 'Shabbat Shalom! 🕯️');
+            lines.push(erevShabbatGreet[lang] || erevShabbatGreet['en']);
         }
 
-        // Main greeting by language
-        const dayName = lang === 'he' ? daysHe[day] : daysEn[day];
-        const greet = timeGreet[lang] || timeGreet['en'];
-
-        // Natural, varied closing questions so it doesn't feel robotic
-        const closingHe = [
-            'במה אוכל לעזור לך היום?',
-            'איך אוכל לסייע לך?',
-            'מה תרצה לדעת?',
-            'ספר לי — במה אוכל לעזור?',
-        ];
-        const closingEn = [
-            'How can I help you today?',
-            'What can I do for you?',
-            'What would you like to know?',
-        ];
-        const closing = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
-        if (lang === 'he') {
-            lines.push(`${greet} 👋`);
-            lines.push(`אני העוזר החכם של ארגון נכי צה"ל. תודה על שירותך — אנחנו כאן בשבילך.`);
-            lines.push(closing(closingHe));
-        } else if (lang === 'en') {
-            lines.push(`${greet} 👋`);
-            lines.push(`I'm the smart assistant of the IDF Disabled Veterans Organization. Thank you for your service — we're here for you.`);
-            lines.push(closing(closingEn));
-        } else if (lang === 'es') {
-            lines.push(`${greet} 👋`);
-            lines.push(`Soy el asistente de la Organización de Veteranos de las FDI. Gracias por su servicio, estamos aquí para usted.`);
-            lines.push(`¿En qué puedo ayudarle?`);
-        } else if (lang === 'ru') {
-            lines.push(`${greet} 👋`);
-            lines.push(`Я помощник организации инвалидов ЦАХАЛа. Спасибо за вашу службу — мы здесь для вас.`);
-            lines.push(`Чем могу помочь?`);
-        } else if (lang === 'ar') {
-            lines.push(`${greet} 👋`);
-            lines.push(`أنا المساعد الذكي لمنظمة معاقي الجيش الإسرائيلي. شكراً لخدمتك — نحن هنا من أجلك.`);
-            lines.push(`كيف يمكنني مساعدتك؟`);
-        } else if (lang === 'am') {
-            lines.push(`${greet} 👋`);
-            lines.push(`የIDF አካል ጉዳተኞች ድርጅት ረዳት ነኝ። አገልግሎትዎ ያስመሰግናል።`);
-            lines.push(`እንዴት ልረዳዎ?`);
-        } else if (lang === 'fr') {
-            lines.push(`${greet} 👋`);
-            lines.push(`Je suis l'assistant intelligent de l'Organisation des Vétérans Handicapés de Tsahal. Merci pour votre service — nous sommes là pour vous.`);
-            lines.push(`Comment puis-je vous aider?`);
-        }
+        lines.push(`${greet} 👋`);
+        lines.push(`${assistantLine[lang] || assistantLine['en']} ${thankYou[lang] || thankYou['en']}`);
+        lines.push(closing);
 
         return lines.join('\n');
     }
@@ -886,6 +956,10 @@
 
         // Footer
         document.getElementById('footer-text').textContent = L.footerText;
+        const fa = document.getElementById('footer-assistant');
+        if (fa) fa.textContent = 'AI Assistant';
+        const sendBtn = document.getElementById('send-btn');
+        if (sendBtn) sendBtn.setAttribute('aria-label', L.sendLabel || 'Send');
 
         // Shortcuts grid
         const grid = document.getElementById('shortcuts-grid');
@@ -990,30 +1064,31 @@
     }
 
     function renderDistCard(origin, facility, actDiv) {
+        const L = getLang();
         const card = document.createElement('div');
         card.className = 'dist-card';
-        card.innerHTML = `<div class="dist-card-loading"><div class="dist-spinner"></div>&rlm;מחשב מסלול מ${origin}...</div>`;
+        card.innerHTML = `<div class="dist-card-loading"><div class="dist-spinner"></div>${L.distLoading}${origin}...</div>`;
         actDiv.appendChild(card);
 
         fetchDistance(origin, facility).then(data => {
             if (!data || !data.driving) {
-                card.innerHTML = `<div class="dist-card-nodata">לא ניתן לחשב מרחק כעת</div>`;
+                card.innerHTML = `<div class="dist-card-nodata">${L.distError}</div>`;
                 return;
             }
             const d = data.driving;
+            const facilityName = L.facilityPrefix + facility;
+            const sentence = L.distText.replace('{km}', d.km).replace('{time}', d.timeStr);
+            const mapsQ = encodeURIComponent('בית הלוחם ' + facility);
             card.innerHTML = `
                 <div class="dist-card-header">
-                    <span class="dist-card-badge">🗺️ לפי Google Maps</span>
+                    <span class="dist-card-badge">🗺️ ${L.distBadge}</span>
                 </div>
                 <div class="dist-card-sentence">
-                    בית הלוחם <strong>${facility}</strong> נמצא רק
-                    <span class="dist-highlight">${d.km} ק"מ</span>
-                    ו-<span class="dist-highlight">${d.timeStr}</span>
-                    נסיעה מ${origin}
+                    <strong>${facilityName}</strong> ${sentence}${origin}
                 </div>
                 <div class="dist-card-actions">
-                    <a class="dist-nav-btn dist-waze" href="https://waze.com/ul?q=בית+הלוחם+${encodeURIComponent(facility)}&navigate=yes" target="_blank" rel="noopener">🚗 נווט ב-Waze</a>
-                    <a class="dist-nav-btn" href="https://maps.google.com/?q=בית+הלוחם+${encodeURIComponent(facility)}" target="_blank" rel="noopener">🗺️ Google Maps</a>
+                    <a class="dist-nav-btn" href="https://maps.google.com/?q=${mapsQ}" target="_blank" rel="noopener">🗺️ ${L.navGoogle}</a>
+                    <a class="dist-nav-btn dist-waze" href="https://waze.com/ul?q=${mapsQ}&navigate=yes" target="_blank" rel="noopener">🚗 ${L.navWaze}</a>
                 </div>`;
             const container = document.getElementById('messages-container');
             container.scrollTop = container.scrollHeight;
@@ -1159,7 +1234,7 @@
         voiceEnabled = !voiceEnabled;
         document.getElementById('btn-voice').classList.toggle('active', voiceEnabled);
         document.getElementById('btn-voice').setAttribute('aria-pressed', voiceEnabled);
-        if (voiceEnabled) speak(currentLang === 'he' ? 'קריאה קולית מופעלת' : 'Voice reading enabled');
+        if (voiceEnabled) speak(getLang().voiceOn || 'Voice reading enabled');
         else window.speechSynthesis && window.speechSynthesis.cancel();
     }
     function resetAccess() {
