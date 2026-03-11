@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const path = require("path");
 const helmet = require("helmet");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
@@ -7,7 +8,6 @@ const xss = require("xss-clean");
 const fetch = require("node-fetch");
 
 const app = express();
-
 app.set("trust proxy", 1);
 app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
 
@@ -30,9 +30,12 @@ app.use(cors({
 app.use(express.json({ limit: "10kb" }));
 app.use(xss());
 
+// Serve static files (index.html)
+app.use(express.static(path.join(__dirname)));
+
 const chatLimiter = rateLimit({
     windowMs: 60 * 1000,
-    max: 15, 
+    max: 15,
     message: { reply: "אתה זז מהר מדי! אנא המתן רגע." }
 });
 app.use("/api/chat", chatLimiter);
@@ -73,10 +76,9 @@ app.post("/api/chat", async (req, res) => {
             return res.status(500).json({ reply: "שגיאה בשרת ה-AI." });
         }
 
-        // השורה המתוקנת:
-        const reply = data.candidates && data.candidates && data.candidates.content && data.candidates.content.parts && data.candidates.content.parts 
-            ? data.candidates.content.parts.text 
-            : "מצטער, לא הצלחתי לעבד את התשובה.";
+        // Fixed array access
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text
+            ?? "מצטער, לא הצלחתי לעבד את התשובה.";
 
         res.json({ reply });
 
@@ -87,6 +89,11 @@ app.post("/api/chat", async (req, res) => {
 });
 
 app.get("/health", (req, res) => res.status(200).send("OK"));
+
+// Catch-all: serve index.html for any other route
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "index.html"));
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));
