@@ -959,12 +959,6 @@
             return '';
         });
 
-        // Extract [NAV]name|gmaps|waze[/NAV]
-        text = text.replace(/\[NAV\](.*?)\|(.*?)\|(.*?)\[\/NAV\]/gs, (_, name, gmaps, waze) => {
-            actions.push({ type: 'nav', name: name.trim(), gmaps: gmaps.trim(), waze: waze.trim() });
-            return '';
-        });
-
         // Extract [PHONE]number[/PHONE]
         text = text.replace(/\[PHONE\](.*?)\[\/PHONE\]/gs, (_, num) => {
             actions.push({ type: 'phone', num: num.trim() });
@@ -1018,8 +1012,8 @@
                     נסיעה מ${origin}
                 </div>
                 <div class="dist-card-actions">
+                    <a class="dist-nav-btn dist-waze" href="https://waze.com/ul?q=בית+הלוחם+${encodeURIComponent(facility)}&navigate=yes" target="_blank" rel="noopener">🚗 נווט ב-Waze</a>
                     <a class="dist-nav-btn" href="https://maps.google.com/?q=בית+הלוחם+${encodeURIComponent(facility)}" target="_blank" rel="noopener">🗺️ Google Maps</a>
-                    <a class="dist-nav-btn dist-waze" href="https://waze.com/ul?q=בית+הלוחם+${encodeURIComponent(facility)}&navigate=yes" target="_blank" rel="noopener">🚗 Waze</a>
                 </div>`;
             const container = document.getElementById('messages-container');
             container.scrollTop = container.scrollHeight;
@@ -1057,26 +1051,6 @@
                     btn.rel = 'noopener';
                     btn.innerHTML = '<span class="msg-btn-icon">🔗</span>' + a.label;
                     actDiv.appendChild(btn);
-                } else if (a.type === 'nav') {
-                    if (a.name) {
-                        const lbl = document.createElement('div');
-                        lbl.style.cssText = 'font-size:11px;color:var(--text-muted);margin-bottom:4px;font-weight:600;';
-                        lbl.textContent = '📍 ' + a.name;
-                        actDiv.appendChild(lbl);
-                    }
-                    const wrap = document.createElement('div');
-                    wrap.className = 'msg-btn-nav-wrap';
-                    const g = document.createElement('a');
-                    g.className = 'msg-btn msg-btn-nav';
-                    g.href = a.gmaps; g.target = '_blank'; g.rel = 'noopener';
-                    g.innerHTML = '<span class="msg-btn-icon">🗺️</span> Google Maps';
-                    const w = document.createElement('a');
-                    w.className = 'msg-btn msg-btn-nav';
-                    w.href = a.waze; w.target = '_blank'; w.rel = 'noopener';
-                    w.innerHTML = '<span class="msg-btn-icon">🚗</span> Waze';
-                    wrap.appendChild(g);
-                    wrap.appendChild(w);
-                    actDiv.appendChild(wrap);
                 } else if (a.type === 'phone') {
                     const btn = document.createElement('a');
                     btn.className = 'msg-btn msg-btn-phone';
