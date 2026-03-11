@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZDVO Digital Concierge</title>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --zdvo-blue: #004a99;
+            --zdvo-light-blue: #e6f0fa;
+            --zdvo-accent: #ffcc00;
+            --text-dark: #333;
+            --white: #ffffff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Assistant', sans-serif; background-color: #f4f7f9; color: var(--text-dark); }
+
+        /* Floating Bubble - Passive & Non-Intrusive */
+        #chat-bubble {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 65px;
+            height: 65px;
+            background-color: var(--zdvo-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: transform 0.2s;
+        }
+        #chat-bubble:hover { transform: scale(1.1); }
+        #chat-bubble svg { width: 35px; fill: var(--white); }
+
+        /* Main Chat Window */
+        #chat-window {
+            position: fixed;
+            bottom: 100px;
+            right: 25px;
+            width: 400px;
+            max-width: 90vw;
+            height: 600px;
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            z-index: 999;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .chat-header {
+            background-color: var(--zdvo-blue);
+            color: var(--white);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Multilingual Selector */
+        #lang-selector {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* Messages Area */
+        #messages-container {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .msg { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 14px; line-height: 1.5; }
+        .bot-msg { background: var(--zdvo-light-blue); align-self: flex-start; border-bottom-left-radius: 2px; }
+        .user-msg { background: var(--zdvo-blue); color: var(--white); align-self: flex-end; border-bottom-right-radius: 2px; }
+
+        /* The "Blue Buttons" Navigation Grid */
+        .shortcuts-grid {
+            padding: 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            background: #f9f9f9;
+            border-top: 1px solid #eee;
+        }
+        .shortcut-btn {
+            background: var(--white);
+            border: 1px solid var(--zdvo-blue);
+            color: var(--zdvo-blue);
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .shortcut-btn:hover { background: var(--zdvo-blue); color: var(--white); }
+
+        /* Input Area */
+        .input-area { padding: 15px; border-top: 1px solid #eee; display: flex; gap: 10px; }
+        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
+        #send-btn { background: var(--zdvo-blue); border: none; padding: 5px 15px; border-radius: 20px; color: white; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="chat-bubble" onclick="toggleChat()">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+    </div>
+
+    <div id="chat-window">
+        <div class="chat-header">
+            <span>קונסיירז' דיגיטלי ZDVO</span>
+            <div>
+                <select id="lang-selector" onchange="changeLang()">
+                    <option value="he">HE</option>
+                    <option value="en">EN</option>
+                    <option value="ru">RU</option>
+                    <option value="ar">AR</option>
+                </select>
+                <button onclick="toggleChat()" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">×</button>
+            </div>
+        </div>
+
+        <div id="messages-container">
+            <div class="msg bot-msg">שלום, אני כאן כדי לעזור לך לנווט באתר ארגון נכי צה"ל. מה תרצה למצוא היום?</div>
+        </div>
+
+        <div class="shortcuts-grid">
+            <button class="shortcut-btn" onclick="ask('ספר לי על הלוואות')">💰 הלוואות</button>
+            <button class="shortcut-btn" onclick="ask('מידע על מלגות לימודים')">🎓 מלגות</button>
+            <button class="shortcut-btn" onclick="ask('איפה בית הלוחם הקרוב אלי?')">🏠 בתי הלוחם</button>
+            <button class="shortcut-btn" onclick="ask('מהן הזכויות שלי?')">📑 זכויות והטבות</button>
+            <button class="shortcut-btn" onclick="ask('מידע על ביטוחים')">🏥 ביטוחים</button>
+            <button class="shortcut-btn" onclick="ask('מידע לפצועי חרבות ברזל')">🛡️ חרבות ברזל</button>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="שאל אותי משהו..." onkeypress="handleKey(event)">
+            <button id="send-btn" onclick="sendMessage()">שלח</button>
+        </div>
+    </div>
+
+    <script>
+        let chatHistory = [{ role: "assistant", content: "שלום, אני כאן כדי לעזור לך לנווט באתר ארגון נכי צה\"ל. מה תרצה למצוא היום?" }];
+
+        function toggleChat() {
+            const win = document.getElementById('chat-window');
+            win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function handleKey(e) { if (e.key === 'Enter') sendMessage(); }
+
+        function ask(text) {
+            document.getElementById('user-input').value = text;
+            sendMessage();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            addMessage(text, 'user-msg');
+            input.value = '';
+            chatHistory.push({ role: "user", content: text });
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages: chatHistory })
+                });
+                const data = await response.json();
+                addMessage(data.reply, 'bot-msg');
+                chatHistory.push({ role: "assistant", content: data.reply });
+            } catch (err) {
+                addMessage("חלה שגיאה בחיבור לשרת.", 'bot-msg');
+            }
+        }
+
+        function addMessage(text, className) {
+            const container = document.getElementById('messages-container');
+            const div = document.createElement('div');
+            div.className = `msg ${className}`;
+            div.innerText = text;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function changeLang() {
+            const lang = document.getElementById('lang-selector').value;
+            // Future logic to reset greeting or notify system prompt
+        }
+    </script>
+</body>
+</html>
