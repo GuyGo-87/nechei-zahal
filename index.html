@@ -40,7 +40,21 @@
         body.high-contrast .shortcut-btn { border: 2px solid #000 !important; }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Heebo', sans-serif; background: var(--off-white); color: var(--text); }
+        html, body { height: 100%; }
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: transparent;
+            color: var(--text);
+        }
+
+        /* Chat elements sit on top */
+        #chat-bubble, #chat-window { z-index: 1000; }
+
+        @media (max-width: 480px) {
+            .hero-stats { gap: 20px; }
+            .hero-stat-num { font-size: 24px; }
+            #hero { justify-content: flex-start; padding-top: 80px; }
+        }
 
         /* ── Floating Bubble ── */
         #chat-bubble {
@@ -308,6 +322,53 @@
             #chat-window { right: 12px; width: calc(100vw - 24px); }
             #chat-bubble { right: 18px; }
         }
+
+        /* ── Action Buttons inside messages ── */
+        .msg-actions {
+            display: flex; flex-direction: column; gap: 7px;
+            margin-top: 10px;
+        }
+        .msg-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 9px 16px; border-radius: 12px;
+            font-size: 13px; font-weight: 600; font-family: 'Heebo', sans-serif;
+            cursor: pointer; text-decoration: none;
+            border: none; width: 100%; text-align: right;
+            transition: all 0.18s cubic-bezier(.34,1.36,.64,1);
+        }
+        .msg-btn-link {
+            background: linear-gradient(135deg, #eef4ff, #e8f0fe);
+            color: var(--navy);
+            border: 1.5px solid rgba(0,79,159,0.2);
+        }
+        .msg-btn-link:hover {
+            background: linear-gradient(135deg, var(--navy-light), var(--navy));
+            color: white; border-color: transparent;
+            transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,45,98,0.25);
+        }
+        .msg-btn-nav {
+            background: linear-gradient(135deg, #fff8f5, #fff0ea);
+            color: var(--navy);
+            border: 1.5px solid rgba(232,96,28,0.25);
+        }
+        .msg-btn-nav:hover {
+            background: linear-gradient(135deg, var(--orange), #c04e0e);
+            color: white; border-color: transparent;
+            transform: translateY(-1px); box-shadow: 0 6px 16px rgba(232,96,28,0.3);
+        }
+        .msg-btn-phone {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            color: #166534;
+            border: 1.5px solid rgba(22,101,52,0.2);
+        }
+        .msg-btn-phone:hover {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: white; border-color: transparent;
+            transform: translateY(-1px); box-shadow: 0 6px 16px rgba(22,163,74,0.3);
+        }
+        .msg-btn-icon { font-size: 15px; flex-shrink: 0; }
+        .msg-btn-nav-wrap { display: flex; gap: 7px; width: 100%; }
+        .msg-btn-nav-wrap .msg-btn-nav { flex: 1; justify-content: center; }
     </style>
 </head>
 <body>
@@ -658,6 +719,103 @@
     function handleKey(e) { if (e.key === 'Enter') sendMessage(); }
     function ask(text) { document.getElementById('user-input').value = text; sendMessage(); }
 
+    // ── Parse bot response into text + action buttons ──
+    function parseButtons(text) {
+        const actions = [];
+
+        // Extract [BTN]label|url[/BTN]
+        text = text.replace(/\[BTN\](.*?)\|(.*?)\[\/BTN\]/gs, (_, label, url) => {
+            actions.push({ type: 'link', label: label.trim(), url: url.trim() });
+            return '';
+        });
+
+        // Extract [NAV]name|gmaps|waze[/NAV]
+        text = text.replace(/\[NAV\](.*?)\|(.*?)\|(.*?)\[\/NAV\]/gs, (_, name, gmaps, waze) => {
+            actions.push({ type: 'nav', name: name.trim(), gmaps: gmaps.trim(), waze: waze.trim() });
+            return '';
+        });
+
+        // Extract [PHONE]number[/PHONE]
+        text = text.replace(/\[PHONE\](.*?)\[\/PHONE\]/gs, (_, num) => {
+            actions.push({ type: 'phone', num: num.trim() });
+            return '';
+        });
+
+        // Clean up leftover raw URLs
+        text = text.replace(/https?:\/\/\S+/g, '');
+
+        return { text: text.trim(), actions };
+    }
+
+    function renderBotContent(raw) {
+        const { text, actions } = parseButtons(raw);
+        const frag = document.createElement('div');
+
+        // Render text paragraphs
+        if (text) {
+            text.split(/
+
++/).forEach(p => {
+                p = p.replace(/
+/g, ' ').trim();
+                if (p) {
+                    const el = document.createElement('p');
+                    el.style.cssText = 'margin:0 0 8px;line-height:1.6;';
+                    el.textContent = p;
+                    frag.appendChild(el);
+                }
+            });
+        }
+
+        // Render action buttons
+        if (actions.length > 0) {
+            const actDiv = document.createElement('div');
+            actDiv.className = 'msg-actions';
+
+            actions.forEach(a => {
+                if (a.type === 'link') {
+                    const btn = document.createElement('a');
+                    btn.className = 'msg-btn msg-btn-link';
+                    btn.href = a.url;
+                    btn.target = '_blank';
+                    btn.rel = 'noopener';
+                    btn.innerHTML = '<span class="msg-btn-icon">🔗</span>' + a.label;
+                    actDiv.appendChild(btn);
+                } else if (a.type === 'nav') {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'msg-btn-nav-wrap';
+                    const g = document.createElement('a');
+                    g.className = 'msg-btn msg-btn-nav';
+                    g.href = a.gmaps; g.target = '_blank'; g.rel = 'noopener';
+                    g.innerHTML = '<span class="msg-btn-icon">🗺️</span> Google Maps';
+                    const w = document.createElement('a');
+                    w.className = 'msg-btn msg-btn-nav';
+                    w.href = a.waze; w.target = '_blank'; w.rel = 'noopener';
+                    w.innerHTML = '<span class="msg-btn-icon">🚗</span> Waze';
+                    wrap.appendChild(g);
+                    wrap.appendChild(w);
+                    if (a.name) {
+                        const lbl = document.createElement('div');
+                        lbl.style.cssText = 'font-size:11px;color:var(--text-muted);margin-bottom:4px;font-weight:600;';
+                        lbl.textContent = '📍 ' + a.name;
+                        actDiv.appendChild(lbl);
+                    }
+                    actDiv.appendChild(wrap);
+                } else if (a.type === 'phone') {
+                    const btn = document.createElement('a');
+                    btn.className = 'msg-btn msg-btn-phone';
+                    btn.href = 'tel:' + a.num.replace(/-/g,'');
+                    btn.innerHTML = '<span class="msg-btn-icon">📞</span>' + a.num;
+                    actDiv.appendChild(btn);
+                }
+            });
+
+            frag.appendChild(actDiv);
+        }
+
+        return frag;
+    }
+
     function addMessage(html, type) {
         const container = document.getElementById('messages-container');
         const wrapper = document.createElement('div');
@@ -671,7 +829,13 @@
         }
         const div = document.createElement('div');
         div.className = 'msg ' + type;
-        div.innerHTML = html;
+
+        if (type === 'bot-msg') {
+            div.appendChild(renderBotContent(html));
+        } else {
+            div.textContent = html;
+        }
+
         wrapper.appendChild(div);
         container.appendChild(wrapper);
         container.scrollTop = container.scrollHeight;
@@ -766,5 +930,6 @@
     // Init
     applyLang('he');
     </script>
+
 </body>
 </html>
