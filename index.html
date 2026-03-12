@@ -1350,6 +1350,19 @@
 
     // Init
     applyLang('he');
-    
 
-    // ══════════════════════════════════════════
+    // Expose functions globally for inline onclick handlers
+    window.toggleChat = toggleChat;
+    window.toggleAccessPanel = toggleAccessPanel;
+    window.toggleLargeText = toggleLargeText;
+    window.toggleHighContrast = toggleHighContrast;
+    window.toggleVoice = toggleVoice;
+    window.resetAccess = resetAccess;
+    window.sendMessage = sendMessage;
+    window.handleKey = handleKey;
+    window.ask = ask;
+    window.changeLang = changeLang;
+
+    </script>
+</body>
+</html>
