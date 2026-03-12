@@ -277,6 +277,23 @@ CORRECT examples:
 - [DIST]נתניה|תל אביב[/DIST]
 - [PHONE]03-6461600[/PHONE]
 
+4. For Beit HaLochem classes, sports & culture programs (חוגים):
+[HUGIM]branch|type[/HUGIM]
+- branch must be one of: blt (Tel Aviv), blh (Haifa), blj (Jerusalem)
+- type must be one of: sport, culture, all
+- This renders beautiful inline activity cards with direct links
+
+HUGIM USAGE RULES:
+- When user asks about sport, classes, culture, activities, חוגים, ספורט, תרבות at a specific branch → use [HUGIM]
+- Match branch to the user's nearest Beit HaLochem (same city mapping as DIST)
+- Use type=sport for sport questions, type=culture for culture/classes, type=all when general
+- CORRECT examples:
+  User near Tel Aviv asks about swimming → [HUGIM]blt|sport[/HUGIM]
+  User in Jerusalem asks about culture classes → [HUGIM]blj|culture[/HUGIM]
+  User asks what activities exist in Haifa → [HUGIM]blh|all[/HUGIM]
+- Place [HUGIM] tag on its own line after your text response
+- You can combine with [DIST] in the same message
+
 RULES:
 - NEVER use [NAV] tags — removed, use [DIST] instead
 - NEVER write raw https:// URLs
