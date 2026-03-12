@@ -475,7 +475,118 @@
             flex-shrink: 0;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-    </style>
+    
+        /* ── Hugim Cards ── */
+        .hugim-section {
+            margin: 8px 0 4px;
+            direction: rtl;
+        }
+        .hugim-section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            padding: 10px 14px;
+            background: linear-gradient(135deg, var(--navy-deep) 0%, var(--midnight) 100%);
+            border-radius: 14px;
+            color: var(--gold-light);
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .hugim-section-header .hugim-branch-badge {
+            background: rgba(201,169,110,0.25);
+            border: 1px solid var(--gold);
+            color: var(--gold-light);
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .hugim-cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .hugim-card {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            border: 1.5px solid rgba(201,169,110,0.25);
+            border-radius: 12px;
+            padding: 10px 12px;
+            text-decoration: none;
+            color: var(--navy-deep);
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.18s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            cursor: pointer;
+        }
+        .hugim-card:hover {
+            background: var(--navy-deep);
+            color: var(--gold-light);
+            border-color: var(--navy-deep);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .hugim-card .hc-emoji {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .hugim-card .hc-name {
+            flex: 1;
+            line-height: 1.3;
+        }
+        .hugim-card .hc-arrow {
+            opacity: 0.4;
+            font-size: 11px;
+            flex-shrink: 0;
+        }
+        .hugim-card:hover .hc-arrow { opacity: 0.8; }
+        .hugim-events-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, #f8f5f0, #fdf9f4);
+            border: 1.5px solid rgba(201,169,110,0.35);
+            border-radius: 12px;
+            padding: 11px 14px;
+            text-decoration: none;
+            color: var(--navy-deep);
+            font-size: 13px;
+            font-weight: 700;
+            transition: all 0.18s;
+            margin-bottom: 6px;
+        }
+        .hugim-events-card:hover {
+            background: var(--gold);
+            color: #fff;
+            border-color: var(--gold);
+        }
+        .hugim-register-btn {
+            width: 100%;
+            padding: 11px;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            color: var(--navy-deep);
+            border: none;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.18s;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            margin-top: 4px;
+        }
+        .hugim-register-btn:hover {
+            opacity: 0.88;
+            transform: translateY(-1px);
+        }
+</style>
 </head>
 <body>
 
@@ -571,6 +682,33 @@
             <a href="https://www.inz.org.il" target="_blank" rel="noopener">ארגון נכי צה"ל</a>
             &middot; <span id="footer-assistant">AI Assistant</span>
         </div>
+
+        <!-- ── Hugim Panel ── -->
+        <div id="hugim-panel" role="dialog" aria-label="חוגים" aria-hidden="true">
+            <div class="hugim-header">
+                <div class="hugim-title">🏊 חוגים בבית הלוחם</div>
+                <button class="hugim-close" onclick="closeHugimPanel()" aria-label="סגור">✕</button>
+            </div>
+            <div class="hugim-tabs">
+                <button class="hugim-tab active" onclick="switchHugimBranch('blt')" id="tab-blt">📍 תל אביב</button>
+                <button class="hugim-tab" onclick="switchHugimBranch('blh')" id="tab-blh">📍 חיפה</button>
+                <button class="hugim-tab" onclick="switchHugimBranch('blj')" id="tab-blj">📍 ירושלים</button>
+            </div>
+            <div class="hugim-cat-row">
+                <button class="hugim-cat active" onclick="switchHugimCat('hugim')" id="cat-hugim">🎨 כל החוגים</button>
+                <button class="hugim-cat" onclick="switchHugimCat('sport')" id="cat-sport">⚽ ספורט</button>
+            </div>
+            <div class="hugim-iframe-wrap">
+                <div class="hugim-loading" id="hugim-loading">
+                    <div class="hugim-spinner"></div>
+                    <span>טוען חוגים...</span>
+                </div>
+                <iframe id="hugim-iframe" src="" title="חוגים" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" onload="onIframeLoad()"></iframe>
+            </div>
+            <div class="hugim-footer">
+                <a id="hugim-external-link" href="#" target="_blank" rel="noopener">🔗 פתח באתר המלא</a>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -610,6 +748,7 @@
                 { icon: '&#128209;', label: 'זכויות', query: 'מהן הזכויות שלי?' },
                 { icon: '&#127973;', label: 'ביטוחים', query: 'מידע על ביטוחים' },
                 { icon: '&#128737;', label: 'חרבות ברזל', query: 'מידע לפצועי חרבות ברזל' },
+                { icon: '🏊', label: 'חוגים', query: 'אילו חוגי ספורט ותרבות יש בבית הלוחם?' },
             ]
         },
         en: {
@@ -646,6 +785,7 @@
                 { icon: '&#128209;', label: 'Rights', query: 'What are my rights?' },
                 { icon: '&#127973;', label: 'Insurance', query: 'Information about insurance' },
                 { icon: '&#128737;', label: 'Iron Swords', query: 'Info for Iron Swords wounded' },
+                { icon: '🏊', label: 'Classes', query: 'What sport and culture classes are available at Beit HaLochem?' },
             ]
         },
         es: {
@@ -682,6 +822,7 @@
                 { icon: '&#128209;', label: 'Derechos', query: '¿Cuáles son mis derechos?' },
                 { icon: '&#127973;', label: 'Seguros', query: 'Información sobre seguros' },
                 { icon: '&#128737;', label: 'Espadas de Hierro', query: 'Info para heridos en Espadas de Hierro' },
+                { icon: '🏊', label: 'Actividades', query: '¿Qué clases de deporte y cultura hay en Beit HaLochem?' },
             ]
         },
         ru: {
@@ -718,6 +859,7 @@
                 { icon: '&#128209;', label: 'Права', query: 'Каковы мои права?' },
                 { icon: '&#127973;', label: 'Страхование', query: 'Информация о страховании' },
                 { icon: '&#128737;', label: 'Мечи железа', query: 'Инфо для раненых операции Мечи железа' },
+                { icon: '🏊', label: 'Занятия', query: 'Какие спортивные и культурные занятия есть в Бейт ха-Лохем?' },
             ]
         },
         ar: {
@@ -754,6 +896,7 @@
                 { icon: '&#128209;', label: 'الحقوق', query: 'ما هي حقوقي؟' },
                 { icon: '&#127973;', label: 'التأمين', query: 'معلومات عن التأمين' },
                 { icon: '&#128737;', label: 'سيوف الحديد', query: 'معلومات لجرحى عملية سيوف الحديد' },
+                { icon: '🏊', label: 'الأنشطة', query: 'ما هي الدورات الرياضية والثقافية في بيت المحارب؟' },
             ]
         },
         am: {
@@ -790,6 +933,7 @@
                 { icon: '&#128209;', label: 'መብቶች', query: 'መብቶቼ ምንድን ናቸው?' },
                 { icon: '&#127973;', label: 'ኢንሹራንስ', query: 'ስለ ኢንሹራንስ መረጃ' },
                 { icon: '&#128737;', label: 'የብረት ሰይፍ', query: 'ለብረት ሰይፍ ቆሰሉ መረጃ' },
+                { icon: '🏊', label: 'ክፍሎች', query: 'በቤት ሃሎኬም ምን ስፖርት እና ባህል ክፍሎች አሉ?' },
             ]
         },
         fr: {
@@ -826,6 +970,7 @@
                 { icon: '&#128209;', label: 'Droits', query: 'Quels sont mes droits?' },
                 { icon: '&#127973;', label: 'Assurances', query: 'Informations sur les assurances' },
                 { icon: '&#128737;', label: 'Épées de fer', query: 'Informations pour les blessés Épées de fer' },
+                { icon: '🏊', label: 'Activités', query: 'Quels cours de sport et culture y a-t-il à Beit HaLochem?' },
             ]
         }
     };
@@ -1077,6 +1222,10 @@
 
     // ── Parse bot response into text + action buttons ──
     function parseButtons(text) {
+        // Handle [HUGIM]branch|type[/HUGIM] — render inline cards
+        text = text.replace(/\[HUGIM\](\w+)\|(\w+)\[\/HUGIM\]/g, (_, branch, type) => {
+            return `__HUGIM__${branch}__${type}__`;
+        });
         const actions = [];
 
         // Extract [NAV]name|gmaps_url|waze_url[/NAV]
@@ -1146,7 +1295,7 @@
                     <strong>${facilityName}</strong> ${sentence}${origin}
                 </div>
                 <div class="dist-card-actions">
-                    <a class="dist-nav-btn" href="https://maps.google.com/?q=${mapsQ}" target="_blank" rel="noopener">
+                    <a class="dist-nav-btn" href="https://www.google.com/maps/search/?api=1&query=${mapsQ}" target="_blank" rel="noopener">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#EA4335"/>
                             <path d="M12 2C8.13 2 5 5.13 5 9c0 1.9.72 3.63 1.9 4.93L12 2z" fill="#FBBC05"/>
@@ -1345,6 +1494,162 @@
 
     // Init
     applyLang('he');
+    
+    // ══════════════════════════════════════════
+    // HUGIM DATABASE — all 3 branches
+    // ══════════════════════════════════════════
+    const HUGIM_DB = {
+        blt: {
+            name: { he:'תל אביב', en:'Tel Aviv', fr:'Tel Aviv', es:'Tel Aviv', ru:'Тель-Авив', ar:'تل أبيب', am:'ቴል አቪቭ' },
+            sport: [
+                { he:'בריכה ושחייה',         en:'Swimming Pool',          emoji:'🏊', url:'https://www.blt.inz.org.il/page.php?type=page&id=558' },
+                { he:'חדר כושר',             en:'Gym',                    emoji:'💪', url:'https://www.blt.inz.org.il/page.php?type=page&id=559' },
+                { he:'פילאטיס מכשירים',       en:'Pilates',                emoji:'🧘', url:'https://www.blt.inz.org.il/page.php?type=page&id=560' },
+                { he:'משחקי כדור',            en:'Ball Games',             emoji:'⚽', url:'https://www.blt.inz.org.il/page.php?type=page&id=561' },
+                { he:'טניס שולחן',            en:'Table Tennis',           emoji:'🏓', url:'https://www.blt.inz.org.il/page.php?type=page&id=562' },
+                { he:'טניס על כסאות גלגלים', en:'Wheelchair Tennis',      emoji:'🎾', url:'https://www.blt.inz.org.il/page.php?type=page&id=563' },
+                { he:'קליעה למטרה',           en:'Shooting Range',         emoji:'🎯', url:'https://www.blt.inz.org.il/page.php?type=page&id=564' },
+                { he:'אופני יד / טנדם',       en:'Hand Cycling / Tandem',  emoji:'🚴', url:'https://www.blt.inz.org.il/page.php?type=page&id=565' },
+                { he:'אומנויות לחימה',        en:'Martial Arts',           emoji:'🥋', url:'https://www.blt.inz.org.il/page.php?type=page&id=566' },
+                { he:'ריקוד ותנועה',          en:'Dance & Movement',       emoji:'💃', url:'https://www.blt.inz.org.il/page.php?type=page&id=567' },
+                { he:"טאי צ'י",               en:"Tai Chi",                emoji:'🧘', url:'https://www.blt.inz.org.il/page.php?type=page&id=960' },
+                { he:'ספורט ימי',             en:'Water Sports',           emoji:'⛵', url:'https://www.blt.inz.org.il/page.php?type=page&id=568' },
+                { he:'קבוצת ריצה',            en:'Running Group',          emoji:'🏃', url:'https://www.blt.inz.org.il/page.php?type=page&id=569' },
+                { he:'מועדון ביליארד',         en:'Billiard Club',          emoji:'🎱', url:'https://www.blt.inz.org.il/page.php?type=page&id=570' },
+            ],
+            culture: [
+                { he:'חוגי תרבות',            en:'Culture Classes',        emoji:'🎨', url:'https://blt.inz.org.il/page.php?type=hugim' },
+                { he:'טיולים / 4X4',          en:'Trips / 4x4',            emoji:'🚙', url:'https://www.blt.inz.org.il/page.php?type=page&id=573' },
+                { he:'החוג לידיעת הארץ',      en:'Land of Israel Circle',  emoji:'🗺️', url:'https://blt.inz.org.il/page.php?type=new86&id=152' },
+                { he:'תערוכות מתחלפות',        en:'Rotating Exhibitions',   emoji:'🖼️', url:'https://www.blt.inz.org.il/page.php?type=page&id=576' },
+                { he:'מועדון הצעירים',         en:'Youth Club',             emoji:'👥', url:'https://www.blt.inz.org.il/page.php?type=page&id=578' },
+                { he:'דור הביניים',            en:'Middle Generation',      emoji:'👨‍👩‍👧', url:'https://www.blt.inz.org.il/page.php?type=page&id=579' },
+                { he:'מועדון הוותיקים',        en:'Veterans Club',          emoji:'⭐', url:'https://www.blt.inz.org.il/page.php?type=page&id=580' },
+                { he:"מועדון הברידג'",         en:"Bridge Club",            emoji:'🃏', url:'https://www.blt.inz.org.il/page.php?type=page&id=581' },
+                { he:'ספרייה חברתית',          en:'Social Library',         emoji:'📚', url:'https://www.blt.inz.org.il/page.php?type=page&id=582' },
+                { he:'מועדון ילדים',           en:"Children's Club",        emoji:'🧒', url:'https://www.blt.inz.org.il/page.php?type=page&id=577' },
+            ],
+            events: 'https://www.blt.inz.org.il/page.php?type=events',
+            register: 'https://blt.inz.org.il/page.php?type=hugim',
+            phone: '03-6461646',
+        },
+        blh: {
+            name: { he:'חיפה', en:'Haifa', fr:'Haïfa', es:'Haifa', ru:'Хайфа', ar:'حيفا', am:'ሃይፋ' },
+            sport: [
+                { he:'בריכה ושחייה',   en:'Swimming Pool',   emoji:'🏊', url:'https://www.blh.inz.org.il/page.php?type=page&id=608' },
+                { he:'חדר כושר',       en:'Gym',             emoji:'💪', url:'https://www.blh.inz.org.il/page.php?type=page&id=609' },
+                { he:'פילאטיס',        en:'Pilates',         emoji:'🧘', url:'https://www.blh.inz.org.il/page.php?type=page&id=610' },
+                { he:'משחקי כדור',     en:'Ball Games',      emoji:'⚽', url:'https://www.blh.inz.org.il/page.php?type=page&id=611' },
+                { he:'טניס שולחן',     en:'Table Tennis',    emoji:'🏓', url:'https://www.blh.inz.org.il/page.php?type=page&id=612' },
+                { he:'אומנויות לחימה', en:'Martial Arts',    emoji:'🥋', url:'https://www.blh.inz.org.il/page.php?type=page&id=614' },
+                { he:'ריקוד ותנועה',   en:'Dance & Movement',emoji:'💃', url:'https://www.blh.inz.org.il/page.php?type=page&id=615' },
+                { he:'ספורט ימי',      en:'Water Sports',    emoji:'⛵', url:'https://www.blh.inz.org.il/page.php?type=page&id=617' },
+                { he:'קבוצת ריצה',     en:'Running Group',   emoji:'🏃', url:'https://www.blh.inz.org.il/page.php?type=page&id=618' },
+                { he:'קליעה למטרה',    en:'Shooting Range',  emoji:'🎯', url:'https://www.blh.inz.org.il/page.php?type=page&id=616' },
+            ],
+            culture: [
+                { he:'חוגי תרבות',      en:'Culture Classes', emoji:'🎨', url:'https://www.blh.inz.org.il/page.php?type=hugim' },
+                { he:'טיולים',          en:'Trips',           emoji:'🚙', url:'https://www.blh.inz.org.il/page.php?type=page&id=623' },
+                { he:'מועדון הצעירים',  en:'Youth Club',      emoji:'👥', url:'https://www.blh.inz.org.il/page.php?type=page&id=665' },
+                { he:'PTSD פוסט טראומה',en:'PTSD Support',   emoji:'🤝', url:'https://www.blh.inz.org.il/page.php?type=page&id=680' },
+                { he:'מועדון הוותיקים', en:'Veterans Club',   emoji:'⭐', url:'https://www.blh.inz.org.il/page.php?type=page&id=626' },
+                { he:'ספרייה חברתית',   en:'Social Library',  emoji:'📚', url:'https://www.blh.inz.org.il/page.php?type=page&id=628' },
+            ],
+            events: 'https://blh.inz.org.il/page.php?type=events',
+            register: 'https://www.blh.inz.org.il/page.php?type=hugim',
+            phone: '04-8423100',
+        },
+        blj: {
+            name: { he:'ירושלים', en:'Jerusalem', fr:'Jérusalem', es:'Jerusalén', ru:'Иерусалим', ar:'القدس', am:'ኢየሩሳሌም' },
+            sport: [
+                { he:'בריכה ושחייה',   en:'Swimming Pool',   emoji:'🏊', url:'https://www.blj.inz.org.il/page.php?type=page&id=642' },
+                { he:'חדר כושר',       en:'Gym',             emoji:'💪', url:'https://www.blj.inz.org.il/page.php?type=page&id=643' },
+                { he:'פילאטיס',        en:'Pilates',         emoji:'🧘', url:'https://www.blj.inz.org.il/page.php?type=page&id=644' },
+                { he:'משחקי כדור',     en:'Ball Games',      emoji:'⚽', url:'https://www.blj.inz.org.il/page.php?type=page&id=645' },
+                { he:'טניס שולחן',     en:'Table Tennis',    emoji:'🏓', url:'https://www.blj.inz.org.il/page.php?type=page&id=646' },
+                { he:'אומנויות לחימה', en:'Martial Arts',    emoji:'🥋', url:'https://www.blj.inz.org.il/page.php?type=page&id=648' },
+                { he:'ריקוד ותנועה',   en:'Dance & Movement',emoji:'💃', url:'https://www.blj.inz.org.il/page.php?type=page&id=649' },
+                { he:'קליעה למטרה',    en:'Shooting Range',  emoji:'🎯', url:'https://www.blj.inz.org.il/page.php?type=page&id=650' },
+                { he:'קבוצת ריצה',     en:'Running Group',   emoji:'🏃', url:'https://www.blj.inz.org.il/page.php?type=page&id=651' },
+            ],
+            culture: [
+                { he:'חוגי תרבות',     en:'Culture Classes', emoji:'🎨', url:'https://www.blj.inz.org.il/page.php?type=hugim' },
+                { he:'טיולים',         en:'Trips',           emoji:'🚙', url:'https://www.blj.inz.org.il/page.php?type=page&id=657' },
+                { he:'מועדון הצעירים', en:'Youth Club',      emoji:'👥', url:'https://www.blj.inz.org.il/page.php?type=page&id=660' },
+                { he:'מועדון הוותיקים',en:'Veterans Club',   emoji:'⭐', url:'https://www.blj.inz.org.il/page.php?type=page&id=662' },
+                { he:'ספרייה חברתית',  en:'Social Library',  emoji:'📚', url:'https://www.blj.inz.org.il/page.php?type=page&id=663' },
+                { he:"מועדון ברידג'",  en:"Bridge Club",     emoji:'🃏', url:'https://www.blj.inz.org.il/page.php?type=page&id=664' },
+            ],
+            events: 'https://blj.inz.org.il/page.php?type=events',
+            register: 'https://www.blj.inz.org.il/page.php?type=hugim',
+            phone: '02-6750011',
+        },
+    };
+
+    // Multilingual labels for hugim cards
+    const HUGIM_LABELS = {
+        sectionTitle: { he:'חוגים ופעילויות', en:'Classes & Activities', fr:'Cours et Activités', es:'Clases y Actividades', ru:'Кружки и Мероприятия', ar:'الدوائر والأنشطة', am:'ክፍሎች እና ተግባራት' },
+        sport:        { he:'ספורט', en:'Sport', fr:'Sport', es:'Deporte', ru:'Спорт', ar:'رياضة', am:'ስፖርት' },
+        culture:      { he:'תרבות', en:'Culture', fr:'Culture', es:'Cultura', ru:'Культура', ar:'ثقافة', am:'ባህል' },
+        events:       { he:'📅 אירועים קרובים', en:'📅 Upcoming Events', fr:'📅 Événements', es:'📅 Próximos Eventos', ru:'📅 Ближайшие мероприятия', ar:'📅 الأحداث القادمة', am:'📅 መጪ ዝግጅቶች' },
+        register:     { he:'✍️ הרשמה לחוגים', en:'✍️ Register for Classes', fr:'✍️ Inscription aux cours', es:'✍️ Inscripción a clases', ru:'✍️ Запись на занятия', ar:'✍️ التسجيل في الدوائر', am:'✍️ ለክፍሎች ይመዝገቡ' },
+        openSite:     { he:'פתח באתר ←', en:'Open website ←', fr:'Ouvrir le site ←', es:'Abrir sitio ←', ru:'Открыть сайт ←', ar:'افتح الموقع ←', am:'ጣቢያ ክፈት ←' },
+        beitHalochem: { he:'בית הלוחם', en:'Beit HaLochem', fr:'Beit HaLochem', es:'Beit HaLochem', ru:'Бейт ха-Лохем', ar:'بيت المحارب', am:'ቤት ሃሎኬም' },
+    };
+
+    function getLangLabel(obj) {
+        return obj[currentLang] || obj['en'];
+    }
+
+    // ── Render [HUGIM] tag ──
+    // Format: [HUGIM]branch|type[/HUGIM]
+    // branch: blt | blh | blj
+    // type: sport | culture | all
+    function renderHugimCards(branch, type) {
+        const db = HUGIM_DB[branch];
+        if (!db) return '';
+
+        const branchName = getLangLabel(db.name);
+        const title = getLangLabel(HUGIM_LABELS.sectionTitle);
+        const bhLabel = getLangLabel(HUGIM_LABELS.beitHalochem);
+
+        let items = [];
+        if (type === 'sport' || type === 'all') items = items.concat(db.sport);
+        if (type === 'culture' || type === 'all') items = items.concat(db.culture);
+
+        const catLabel = type === 'sport'
+            ? getLangLabel(HUGIM_LABELS.sport)
+            : type === 'culture'
+                ? getLangLabel(HUGIM_LABELS.culture)
+                : getLangLabel(HUGIM_LABELS.sport) + ' + ' + getLangLabel(HUGIM_LABELS.culture);
+
+        const cards = items.map(item => {
+            const name = item[currentLang] || item.en || item.he;
+            return `<a href="${item.url}" target="_blank" rel="noopener" class="hugim-card">
+                <span class="hc-emoji">${item.emoji}</span>
+                <span class="hc-name">${name}</span>
+                <span class="hc-arrow">←</span>
+            </a>`;
+        }).join('');
+
+        const eventsLabel = getLangLabel(HUGIM_LABELS.events);
+        const registerLabel = getLangLabel(HUGIM_LABELS.register);
+
+        return `<div class="hugim-section">
+            <div class="hugim-section-header">
+                <span>${title}</span>
+                <span class="hugim-branch-badge">${bhLabel} ${branchName}</span>
+                <span style="margin-right:auto;opacity:0.7;font-size:11px;">${catLabel}</span>
+            </div>
+            <div class="hugim-cards-grid">${cards}</div>
+            <a href="${db.events}" target="_blank" rel="noopener" class="hugim-events-card">
+                <span>${eventsLabel}</span>
+                <span style="opacity:0.6;font-size:12px;">${getLangLabel(HUGIM_LABELS.openSite)}</span>
+            </a>
+            <a href="${db.register}" target="_blank" rel="noopener" class="hugim-register-btn">${registerLabel}</a>
+        </div>`;
+    }
+
     </script>
 
 </body>
