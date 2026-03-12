@@ -388,6 +388,47 @@
         .msg-btn-icon { font-size: 15px; flex-shrink: 0; }
         .msg-btn-nav-wrap { display: flex; gap: 7px; width: 100%; }
         .msg-btn-nav-wrap .msg-btn-nav { flex: 1; justify-content: center; }
+        /* ── Beit HaLochem Branch Card ── */
+        .bl-cards-wrap { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; width: 100%; }
+        .bl-card {
+            background: linear-gradient(145deg, #fdfaf5 0%, #f8f4ed 100%);
+            border: 1.5px solid rgba(201,169,110,0.28);
+            border-radius: 14px;
+            overflow: hidden;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .bl-card:hover { box-shadow: 0 6px 20px rgba(26,26,46,0.12); transform: translateY(-1px); }
+        .bl-card-top {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 11px 14px 10px;
+            border-bottom: 1px solid rgba(201,169,110,0.15);
+        }
+        .bl-card-name {
+            font-size: 13.5px; font-weight: 700; color: var(--navy);
+            display: flex; align-items: center; gap: 7px;
+        }
+        .bl-card-name::before { content: '🏠'; font-size: 14px; }
+        .bl-card-link {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 12px; font-weight: 600; color: #8a6a30;
+            text-decoration: none; padding: 5px 11px;
+            background: rgba(201,169,110,0.12);
+            border: 1px solid rgba(201,169,110,0.25);
+            border-radius: 20px;
+            transition: all 0.18s;
+        }
+        .bl-card-link:hover { background: var(--navy); color: var(--gold); border-color: transparent; }
+        .bl-card-phone {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 9px 14px;
+            font-size: 14px; font-weight: 700; color: white;
+            background: linear-gradient(145deg, #1a7a45, #15603a);
+            text-decoration: none; letter-spacing: 0.3px;
+            transition: filter 0.18s;
+        }
+        .bl-card-phone:hover { filter: brightness(1.1); }
+        .bl-card-phone svg { flex-shrink: 0; }
+
 
         /* ── Distance Card ── */
         .dist-card {
@@ -1100,6 +1141,12 @@
             return '';
         });
 
+        // Extract [BL]name|url|phone[/BL] — Beit HaLochem branch card
+        text = text.replace(/\[BL\](.*?)\|(.*?)\|(.*?)\[\/BL\]/gs, (_, name, url, phone) => {
+            actions.push({ type: 'bl', name: name.trim(), url: url.trim(), phone: phone.trim() });
+            return '';
+        });
+
         // Extract [DIST]origin|facility[/DIST]
         text = text.replace(/\[DIST\](.*?)\|(.*?)\[\/DIST\]/gs, (_, origin, facility) => {
             actions.push({ type: 'dist', origin: origin.trim(), facility: facility.trim() });
@@ -1195,8 +1242,28 @@
             const actDiv = document.createElement('div');
             actDiv.className = 'msg-actions';
 
+            // Group consecutive BL cards into a single wrapper
+            const blWrap = actions.some(a => a.type === 'bl') ? document.createElement('div') : null;
+            if (blWrap) blWrap.className = 'bl-cards-wrap';
+
             actions.forEach(a => {
-                if (a.type === 'link') {
+                if (a.type === 'bl') {
+                    const card = document.createElement('div');
+                    card.className = 'bl-card';
+                    card.innerHTML = `
+                        <div class="bl-card-top">
+                            <span class="bl-card-name">${a.name}</span>
+                            <a href="${a.url}" target="_blank" rel="noopener" class="bl-card-link">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                                לאתר החוגים
+                            </a>
+                        </div>
+                        <a href="tel:${a.phone.replace(/-/g,'')}" class="bl-card-phone">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.84 3.91 19.79 19.79 0 016.88 5.26a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 13a16 16 0 006.29 6.29l1.1-1.1a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+                            ${a.phone}
+                        </a>`;
+                    blWrap.appendChild(card);
+                } else if (a.type === 'link') {
                     const btn = document.createElement('a');
                     btn.className = 'msg-btn msg-btn-link';
                     btn.href = a.url;
@@ -1228,6 +1295,7 @@
                 }
             });
 
+            if (blWrap && blWrap.children.length > 0) actDiv.appendChild(blWrap);
             frag.appendChild(actDiv);
         }
 
