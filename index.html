@@ -481,7 +481,7 @@
 <body>
 
     <!-- Floating Bubble -->
-    <div id="chat-bubble" onclick="toggleChat()" role="button" aria-label="פתח עוזר צ'אט">
+    <div id="chat-bubble" role="button" aria-label="פתח עוזר צ'אט">
         <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.524 3.656 1.435 5.163L2 22l4.837-1.435A9.956 9.956 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
     </div>
 
@@ -1048,6 +1048,7 @@
     }
 
     // ── Chat ──
+    document.getElementById('chat-bubble').addEventListener('click', toggleChat);
     function toggleChat() {
         const win = document.getElementById('chat-window');
         const bubble = document.getElementById('chat-bubble');
