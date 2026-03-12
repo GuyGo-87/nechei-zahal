@@ -1009,12 +1009,9 @@
         document.getElementById('txt-voice').textContent = L.txtVoice;
         document.getElementById('txt-reset').textContent = L.txtReset;
 
-        // Footer
-        document.getElementById('footer-text').textContent = L.footerText;
-        const fa = document.getElementById('footer-assistant');
-        if (fa) fa.textContent = 'AI Assistant';
+        // Send button aria label
         const sendBtn = document.getElementById('send-btn');
-        if (sendBtn) sendBtn.setAttribute('aria-label', L.sendLabel || 'Send');
+        if (sendBtn) sendBtn.setAttribute('aria-label', L.sendLabel || 'שלח');
 
         // Shortcuts grid
         const grid = document.getElementById('shortcuts-grid');
@@ -1023,7 +1020,7 @@
             const btn = document.createElement('button');
             btn.className = 'shortcut-btn';
             btn.innerHTML = `<span class="btn-icon">${s.icon}</span> ${s.label}`;
-            btn.onclick = () => ask(s.query);
+            btn.onclick = () => window.ask(s.query);
             grid.appendChild(btn);
         });
     }
@@ -1348,8 +1345,12 @@
         window.speechSynthesis.speak(utt);
     }
 
-    // Init
-    applyLang('he');
+    // Init — wait for DOM to be fully ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => applyLang('he'));
+    } else {
+        applyLang('he');
+    }
 
     // Expose functions globally for inline onclick handlers
     window.toggleChat = toggleChat;
