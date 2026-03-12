@@ -649,7 +649,7 @@ app.use((err, req, res, next) => {
 // START
 // ============================================================
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
     console.log(`✅ INZ Assistant running on port ${PORT}`);
     console.log(`🔐 Security: helmet + cors + rate-limit (x2) + xss-clean + input validation + timeout`);
     console.log(`🔑 Gemini API: ${GEMINI_API_KEY ? "READY" : "⚠️  MISSING — set GEMINI_API_KEY in environment"}`);
