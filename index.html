@@ -908,20 +908,32 @@
         const shabbatGreet = { he:'שבת שלום! 🕯️', en:'Shabbat Shalom! 🕯️', fr:'Chabbat Chalom! 🕯️', es:'¡Shabat Shalom! 🕯️', ru:'Шаббат Шалом! 🕯️', ar:'شبات شالوم! 🕯️', am:'ሻባት ሻሎም! 🕯️' };
         const erevShabbatGreet = { he:'שבת שלום! כבר מכינים לשבת 🕯️', en:'Shabbat Shalom! 🕯️', fr:'Chabbat Chalom! 🕯️', es:'¡Shabat Shalom! 🕯️', ru:'Шаббат Шалом! 🕯️', ar:'شبات شالوم! 🕯️', am:'ሻባት ሻሎም! 🕯️' };
 
+        // Holiday calendar — updated for 2026 Hebrew year dates
+        // NOTE: update annually as Hebrew dates shift each year
         const holidayCalendar = [
-            { m:3,  d:13, key:'purim' }, { m:3,  d:14, key:'purim' },
-            { m:4,  d:12, key:'pesach' }, { m:4,  d:13, key:'pesach' },
-            { m:4,  d:18, key:'pesach' }, { m:4,  d:19, key:'pesach' },
-            { m:4,  d:23, key:'independence' },
-            { m:6,  d:1,  key:'shavuot' }, { m:6,  d:2, key:'shavuot' },
-            { m:9,  d:22, key:'roshHashana' }, { m:9,  d:23, key:'roshHashana' },
-            { m:10, d:1,  key:'yomKippur' },
-            { m:10, d:6,  key:'sukkot' }, { m:10, d:7, key:'sukkot' },
-            { m:10, d:13, key:'shminiAtzeret' },
-            { m:10, d:14, key:'simchatTorah' },
-            { m:12, d:25, key:'hanukkah' }, { m:12, d:26, key:'hanukkah' },
-            { m:12, d:27, key:'hanukkah' }, { m:1, d:1, key:'hanukkah' },
-            { m:1,  d:2,  key:'hanukkah' },
+            // Purim 2026: Mar 3-4 (already past — kept for reference, won't trigger)
+            // Pesach 2026: Apr 1-2 (first days) + Apr 7-8 (last days)
+            { m:4,  d:1,  key:'pesach' }, { m:4,  d:2,  key:'pesach' },
+            { m:4,  d:7,  key:'pesach' }, { m:4,  d:8,  key:'pesach' },
+            // Yom HaAtzmaut 2026: Apr 29
+            { m:4,  d:29, key:'independence' },
+            // Shavuot 2026: May 21-22
+            { m:5,  d:21, key:'shavuot' }, { m:5,  d:22, key:'shavuot' },
+            // Rosh Hashana 2026: Sep 11-12
+            { m:9,  d:11, key:'roshHashana' }, { m:9,  d:12, key:'roshHashana' },
+            // Yom Kippur 2026: Sep 20
+            { m:9,  d:20, key:'yomKippur' },
+            // Sukkot 2026: Sep 25-26
+            { m:9,  d:25, key:'sukkot' }, { m:9,  d:26, key:'sukkot' },
+            // Shmini Atzeret + Simchat Torah 2026: Oct 2-3
+            { m:10, d:2,  key:'shminiAtzeret' },
+            { m:10, d:3,  key:'simchatTorah' },
+            // Hanukkah 2026: Dec 14-22
+            { m:12, d:14, key:'hanukkah' }, { m:12, d:15, key:'hanukkah' },
+            { m:12, d:16, key:'hanukkah' }, { m:12, d:17, key:'hanukkah' },
+            { m:12, d:18, key:'hanukkah' }, { m:12, d:19, key:'hanukkah' },
+            { m:12, d:20, key:'hanukkah' }, { m:12, d:21, key:'hanukkah' },
+            { m:12, d:22, key:'hanukkah' },
         ];
 
         const todayHolidayEntry = holidayCalendar.find(h => h.m === month && h.d === date);
